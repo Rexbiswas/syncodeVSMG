@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <defs>
+    <linearGradient id="syncode-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7" />
+      <stop offset="50%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Squircle Container -->
+  <rect x="1" y="1" width="30" height="30" rx="7.5" fill="url(#bg-gradient)" stroke="#27272a" stroke-width="1.2" />
+
+  <!-- Code Brackets: Left `<` -->
+  <path d="M11 11.5L6.5 16L11 20.5" stroke="url(#syncode-gradient)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Code Brackets: Right `>` -->
+  <path d="M21 11.5L25.5 16L21 20.5" stroke="url(#syncode-gradient)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Code Slash `/` with slight angle -->
+  <path d="M17.5 10.5L14.5 21.5" stroke="#f4f4f5" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Live Collaboration Pulse Indicator -->
+  <circle cx="24.5" cy="7.5" r="2.2" fill="#10b981" />
+  <circle cx="24.5" cy="7.5" r="3.6" stroke="#10b981" stroke-width="0.8" opacity="0.6" />
+</svg>
+

@@ -1,0 +1,59 @@
+{
+  "name": "syncode-vscode",
+  "displayName": "SYNCODE Real-Time Collaboration",
+  "description": "Universal Real-Time Code Collaboration extension for Visual Studio Code",
+  "version": "0.1.0",
+  "publisher": "syncode",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "syncode.connect",
+        "title": "SYNCODE: Join Collaboration Session"
+      },
+      {
+        "command": "syncode.disconnect",
+        "title": "SYNCODE: Leave Collaboration Session"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "SYNCODE Configuration",
+      "properties": {
+        "syncode.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:4000/api/v1",
+          "description": "The SYNCODE backend server URL"
+        },
+        "syncode.collaborationUrl": {
+          "type": "string",
+          "default": "ws://localhost:4001",
+          "description": "The SYNCODE real-time collaboration WebSocket URL"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "typecheck": "tsc --noEmit -p ./"
+  },
+  "dependencies": {
+    "@syncode/editor-adapter": "workspace:*",
+    "@syncode/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.19",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.3"
+  }
+}
+

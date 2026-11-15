@@ -1,0 +1,39 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Initial Foundation Schema (Phase 1)
+// Minimal foundation entities to establish migrations, connectivity, and client generation.
+
+model HealthCheckRecord {
+  id        String   @id @default(uuid())
+  checkedAt DateTime @default(now())
+  status    String   @default("ok")
+
+  @@map("health_check_records")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workspaces")
+}
+

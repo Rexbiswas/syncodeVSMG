@@ -1,0 +1,17 @@
+<idea-plugin>
+    <id>com.syncode.jetbrains</id>
+    <name>SYNCODE Real-Time Collaboration</name>
+    <vendor email="support@syncode.dev" url="https://syncode.dev">SYNCODE</vendor>
+
+    <description><![CDATA[
+    Universal Real-Time Code Collaboration plugin for IntelliJ IDEA and JetBrains IDEs.
+    Enables cross-IDE live sharing with VS Code, Neovim, and Web.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Foundation extension points configured for Phase 2 -->
+    </extensions>
+</idea-plugin>
+
