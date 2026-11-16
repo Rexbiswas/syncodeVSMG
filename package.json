@@ -12,7 +12,9 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "db:generate": "turbo run db:generate",
-    "db:migrate": "turbo run db:migrate"
+    "db:migrate": "turbo run db:migrate",
+    "db:migrate:dev": "turbo run db:migrate:dev",
+    "db:push": "turbo run db:push"
   },
   "devDependencies": {
     "turbo": "^2.4.4",

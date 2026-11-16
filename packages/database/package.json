@@ -6,10 +6,12 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "prisma generate && tsc",
+    "build": "dotenv -e ../../.env -- prisma generate && tsc",
     "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:push": "dotenv -e ../../.env -- prisma db push",
     "test": "vitest run"
   },
   "dependencies": {
@@ -18,9 +20,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.19",
+    "dotenv-cli": "^11.1.0",
     "prisma": "^6.4.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.7"
   }
 }
-
