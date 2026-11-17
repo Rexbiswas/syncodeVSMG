@@ -80,62 +80,92 @@ export function CollaborationCta() {
 
   return (
     <section ref={sectionRef} className="relative mt-20 sm:mt-28">
-      {/* Outer Glow Highlights */}
+      {/* Outer Full-Box Aura Glow Highlights */}
       <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
         <motion.div
           animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.15, 0.25, 0.15],
+            scale: [1, 1.08, 1],
+            opacity: [0.18, 0.32, 0.18],
           }}
           transition={{
             repeat: Infinity,
-            duration: 10,
+            duration: 8,
             ease: 'easeInOut',
           }}
-          className="h-[360px] w-[650px] rounded-full bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-yellow-500/20 blur-3xl"
+          className="h-full w-full max-w-4xl rounded-3xl bg-gradient-to-r from-purple-500/20 via-blue-500/15 to-yellow-500/20 blur-3xl"
         />
       </div>
 
       <div
         ref={cardRef}
-        className="relative overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/75 dark:border-zinc-800/80 dark:bg-zinc-900/65 backdrop-blur-xl p-8 sm:p-14 shadow-2xl transition-all"
+        className="relative rounded-3xl p-[1.5px] overflow-hidden shadow-2xl shadow-purple-500/10 dark:shadow-purple-950/20 transition-all"
       >
-        {/* Animated Moving Gradient Beam on Top Border */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] overflow-hidden">
+        {/* Full-Box 360-Degree Continuous Rotating Border Beam */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 7,
+            ease: 'linear',
+          }}
+          className="pointer-events-none absolute -inset-[150%] bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_270deg,#a855f7_305deg,#3b82f6_330deg,#eab308_350deg,transparent_360deg)]"
+        />
+
+        {/* Static Base Subtle Border Layer */}
+        <div className="pointer-events-none absolute inset-0 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80" />
+
+        {/* Inner Card Background & Content */}
+        <div className="relative overflow-hidden rounded-[22.5px] bg-white/85 dark:bg-zinc-900/80 backdrop-blur-2xl p-8 sm:p-14">
+          {/* Dynamic Full-Box Ambient Mesh Glowing Behind Content */}
           <motion.div
-            animate={{ x: ['-100%', '100%'] }}
+            animate={{
+              x: [-30, 30, -30],
+              y: [-15, 15, -15],
+              scale: [1, 1.15, 1],
+              opacity: [0.15, 0.28, 0.15],
+            }}
             transition={{
               repeat: Infinity,
-              duration: 4,
-              ease: 'linear',
+              duration: 8,
+              ease: 'easeInOut',
             }}
-            className="h-full w-1/2 bg-gradient-to-r from-transparent via-purple-500 via-blue-500 via-yellow-400 to-transparent"
+            className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/20 blur-3xl"
           />
-        </div>
+          <motion.div
+            animate={{
+              x: [30, -30, 30],
+              y: [15, -15, 15],
+              scale: [1.1, 0.95, 1.1],
+              opacity: [0.12, 0.24, 0.12],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 10,
+              ease: 'easeInOut',
+            }}
+            className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-tr from-blue-500/30 to-emerald-500/20 blur-3xl"
+          />
 
-        {/* Floating Ambient Mesh Behind Content */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-purple-500/10 blur-2xl" />
-        <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-500/10 blur-2xl" />
+          <div className="relative z-10 mx-auto max-w-3xl text-center py-4">
+            {/* Headline */}
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50 leading-tight">
+              <span>Bridge Any Editor.</span>
+              <span className="block mt-2.5 sm:mt-3 text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight">
+                <span>{typedText || '\u00A0'}</span>
+                <motion.span
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.7, ease: 'easeInOut' }}
+                  className="inline-block w-[2px] h-[0.8em] ml-1 bg-zinc-500 dark:bg-zinc-400 align-middle"
+                />
+              </span>
+            </h2>
 
-        <div className="relative z-10 mx-auto max-w-3xl text-center py-4">
-          {/* Headline */}
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50 leading-tight">
-            <span>Bridge Any Editor.</span>
-            <span className="block mt-2.5 sm:mt-3 text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight">
-              <span>{typedText || '\u00A0'}</span>
-              <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ repeat: Infinity, duration: 0.7, ease: 'easeInOut' }}
-                className="inline-block w-[2px] h-[0.8em] ml-1 bg-zinc-500 dark:bg-zinc-400 align-middle"
-              />
-            </span>
-          </h2>
-
-          {/* Description */}
-          <p className="mt-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-            Experience zero-latency state synchronization with your team across VS Code, JetBrains IDEs, and Neovim.
-            Engineered with CRDT vector clocks, high-performance NestJS microservices, and standardized protocol contracts.
-          </p>
+            {/* Description */}
+            <p className="mt-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">
+              Experience zero-latency state synchronization with your team across VS Code, JetBrains IDEs, and Neovim.
+              Engineered with CRDT vector clocks, high-performance NestJS microservices, and standardized protocol contracts.
+            </p>
+          </div>
         </div>
       </div>
     </section>
