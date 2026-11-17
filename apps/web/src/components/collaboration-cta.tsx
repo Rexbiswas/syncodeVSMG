@@ -119,14 +119,14 @@ export function CollaborationCta() {
 
         <div className="relative z-10 mx-auto max-w-3xl text-center py-4">
           {/* Headline */}
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50 leading-tight">
-            <span>Bridge Any Editor.</span>{' '}
-            <span className="inline-block text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight align-baseline">
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50 leading-tight">
+            <span>Bridge Any Editor.</span>
+            <span className="block mt-2.5 sm:mt-3 text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight">
               <span>{typedText || '\u00A0'}</span>
               <motion.span
                 animate={{ opacity: [1, 0] }}
                 transition={{ repeat: Infinity, duration: 0.7, ease: 'easeInOut' }}
-                className="inline-block w-[2px] h-[0.75em] ml-1 bg-zinc-500 dark:bg-zinc-400 align-middle"
+                className="inline-block w-[2px] h-[0.8em] ml-1 bg-zinc-500 dark:bg-zinc-400 align-middle"
               />
             </span>
           </h2>
