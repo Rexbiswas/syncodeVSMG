@@ -15,11 +15,11 @@ export function CollaborationCta() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Typewriter state for "Code in Real-Time."
-  const [typedText, setTypedText] = useState('');
+  // Typewriter state for "Code in Real-Time." initialized with full text so it is always visible
+  const [typedText, setTypedText] = useState(TYPING_TARGET);
 
   useEffect(() => {
-    let index = 0;
+    let index = TYPING_TARGET.length;
     let isDeleting = false;
     let timeoutId: NodeJS.Timeout;
 
@@ -29,7 +29,7 @@ export function CollaborationCta() {
         setTypedText(TYPING_TARGET.slice(0, index));
         if (index === TYPING_TARGET.length) {
           isDeleting = true;
-          timeoutId = setTimeout(tick, 2200); // Pause on completed sentence
+          timeoutId = setTimeout(tick, 3500); // Pause on completed sentence
           return;
         }
         timeoutId = setTimeout(tick, 85 + Math.random() * 25);
@@ -38,14 +38,14 @@ export function CollaborationCta() {
         setTypedText(TYPING_TARGET.slice(0, index));
         if (index === 0) {
           isDeleting = false;
-          timeoutId = setTimeout(tick, 600); // Pause before re-typing
+          timeoutId = setTimeout(tick, 800); // Pause before re-typing
           return;
         }
         timeoutId = setTimeout(tick, 45);
       }
     };
 
-    timeoutId = setTimeout(tick, 500);
+    timeoutId = setTimeout(tick, 3500);
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -119,11 +119,11 @@ export function CollaborationCta() {
 
         <div className="relative z-10 mx-auto max-w-3xl text-center py-4">
           {/* Headline */}
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-900 dark:text-zinc-50 leading-[1.15]">
-            Bridge Any Editor.{' '}
-            <span className="inline-block text-zinc-500 dark:text-zinc-400 font-mono tracking-tight font-bold">
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50 leading-tight">
+            <span>Bridge Any Editor.</span>{' '}
+            <span className="inline-block text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight align-baseline">
               <span>{typedText}</span>
-              <span className="inline-block w-[3px] h-[0.78em] ml-1 bg-zinc-500 dark:bg-zinc-400 animate-pulse align-middle" />
+              <span className="inline-block w-[2px] h-[0.75em] ml-1 bg-zinc-500 dark:bg-zinc-400 animate-pulse align-middle" />
             </span>
           </h2>
 
