@@ -15,11 +15,11 @@ export function CollaborationCta() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Typewriter state for "Code in Real-Time." initialized with full text so it is always visible
-  const [typedText, setTypedText] = useState(TYPING_TARGET);
+  // Typewriter state for "Code in Real-Time."
+  const [typedText, setTypedText] = useState('');
 
   useEffect(() => {
-    let index = TYPING_TARGET.length;
+    let index = 0;
     let isDeleting = false;
     let timeoutId: NodeJS.Timeout;
 
@@ -29,23 +29,23 @@ export function CollaborationCta() {
         setTypedText(TYPING_TARGET.slice(0, index));
         if (index === TYPING_TARGET.length) {
           isDeleting = true;
-          timeoutId = setTimeout(tick, 3500); // Pause on completed sentence
+          timeoutId = setTimeout(tick, 2600); // Pause on completed sentence
           return;
         }
-        timeoutId = setTimeout(tick, 85 + Math.random() * 25);
+        timeoutId = setTimeout(tick, 90 + Math.random() * 25);
       } else {
         index--;
         setTypedText(TYPING_TARGET.slice(0, index));
         if (index === 0) {
           isDeleting = false;
-          timeoutId = setTimeout(tick, 800); // Pause before re-typing
+          timeoutId = setTimeout(tick, 700); // Pause before re-typing
           return;
         }
         timeoutId = setTimeout(tick, 45);
       }
     };
 
-    timeoutId = setTimeout(tick, 3500);
+    timeoutId = setTimeout(tick, 400);
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -122,8 +122,12 @@ export function CollaborationCta() {
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-50 leading-tight">
             <span>Bridge Any Editor.</span>{' '}
             <span className="inline-block text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight align-baseline">
-              <span>{typedText}</span>
-              <span className="inline-block w-[2px] h-[0.75em] ml-1 bg-zinc-500 dark:bg-zinc-400 animate-pulse align-middle" />
+              <span>{typedText || '\u00A0'}</span>
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ repeat: Infinity, duration: 0.7, ease: 'easeInOut' }}
+                className="inline-block w-[2px] h-[0.75em] ml-1 bg-zinc-500 dark:bg-zinc-400 align-middle"
+              />
             </span>
           </h2>
 
