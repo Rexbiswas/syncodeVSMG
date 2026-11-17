@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -16,9 +15,6 @@ import {
   Laptop,
   CheckCircle2,
   Terminal,
-  Zap,
-  Shield,
-  ArrowRight,
   ExternalLink,
 } from 'lucide-react';
 
@@ -167,18 +163,6 @@ export default function Home() {
           animate="visible"
           className="flex flex-col items-center text-center space-y-6"
         >
-          {/* Platform Capability Badges */}
-          <motion.div variants={heroItemVariants} className="flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm text-zinc-700 dark:text-zinc-300 shadow-sm">
-              <Zap className="h-3 w-3 text-amber-500" />
-              <span>Low-Latency Real-Time CRDT</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm text-zinc-700 dark:text-zinc-300 shadow-sm">
-              <Shield className="h-3 w-3 text-emerald-500" />
-              <span>Production Monorepo Foundation</span>
-            </span>
-          </motion.div>
-
           <motion.h1
             variants={heroItemVariants}
             className="text-4xl font-extrabold tracking-tight sm:text-6xl text-zinc-900 dark:text-zinc-50 max-w-4xl leading-[1.12]"
@@ -202,20 +186,6 @@ export default function Home() {
             variants={heroItemVariants}
             className="flex flex-wrap items-center justify-center gap-4 pt-2"
           >
-            <motion.div
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            >
-              <Link href="/status">
-                <Button size="lg" className="gap-2 font-medium shadow-md shadow-zinc-900/10 dark:shadow-black/40">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  View System Status
-                  <ArrowRight className="h-4 w-4 ml-0.5" />
-                </Button>
-              </Link>
-            </motion.div>
-
             <motion.div
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
