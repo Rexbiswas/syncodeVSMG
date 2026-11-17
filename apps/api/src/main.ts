@@ -6,6 +6,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module.js';
 import { ConfigService } from './config/config.service.js';
 import { LoggerService } from './logger/logger.service.js';
@@ -28,12 +29,13 @@ async function bootstrap() {
 
   // Security middlewares
   app.use(helmet());
+  app.use(cookieParser());
   app.use(
     cors({
       origin: configService.corsOrigin,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     }),
   );
 
@@ -62,4 +64,3 @@ bootstrap().catch((err) => {
   console.error('Fatal error during application startup:', err);
   process.exit(1);
 });
-

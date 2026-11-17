@@ -21,6 +21,34 @@ export const apiEnvSchema = z.object({
   REDIS_HOST: z.string().optional().default('localhost'),
   REDIS_PORT: z.coerce.number().optional().default(6379),
   REDIS_PASSWORD: z.string().optional().default(''),
+
+  // Phase 2: JWT & Authentication Secrets
+  JWT_ACCESS_SECRET: z
+    .string()
+    .min(16, 'JWT_ACCESS_SECRET must be at least 16 characters')
+    .default('syncode_super_secret_jwt_access_key_change_in_production_min32chars'),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default('7d'),
+  AUTH_COOKIE_SECURE: z
+    .union([z.boolean(), z.string()])
+    .transform((val) => val === true || val === 'true')
+    .default(false),
+  AUTH_COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+
+  // Phase 2: Google OAuth (Optional - only enabled when configured)
+  GOOGLE_CLIENT_ID: z.string().optional().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
+  GOOGLE_CALLBACK_URL: z
+    .string()
+    .optional()
+    .default('http://localhost:4000/api/v1/auth/google/callback'),
+
+  // Phase 2: SMTP / Email Delivery (Optional)
+  SMTP_HOST: z.string().optional().default(''),
+  SMTP_PORT: z.coerce.number().optional().default(587),
+  SMTP_USER: z.string().optional().default(''),
+  SMTP_PASSWORD: z.string().optional().default(''),
+  EMAIL_FROM: z.string().optional().default('no-reply@syncode.dev'),
 });
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
@@ -62,4 +90,3 @@ export function validateWebEnv(env: Record<string, unknown>): WebEnv {
 export function validateCollaborationEnv(env: Record<string, unknown>): CollaborationEnv {
   return collaborationEnvSchema.parse(env);
 }
-

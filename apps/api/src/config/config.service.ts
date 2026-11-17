@@ -56,5 +56,68 @@ export class ConfigService {
   get redisPassword(): string | undefined {
     return this.env.REDIS_PASSWORD || undefined;
   }
-}
 
+  // ---------------------------------------------------------------------------
+  // Phase 2: Authentication & Token Configuration
+  // ---------------------------------------------------------------------------
+
+  get jwtAccessSecret(): string {
+    return this.env.JWT_ACCESS_SECRET;
+  }
+
+  get jwtAccessExpiresIn(): string {
+    return this.env.JWT_ACCESS_EXPIRES_IN;
+  }
+
+  get refreshTokenExpiresIn(): string {
+    return this.env.REFRESH_TOKEN_EXPIRES_IN;
+  }
+
+  get authCookieSecure(): boolean {
+    return this.env.AUTH_COOKIE_SECURE;
+  }
+
+  get authCookieSameSite(): 'lax' | 'strict' | 'none' {
+    return this.env.AUTH_COOKIE_SAME_SITE;
+  }
+
+  get googleClientId(): string {
+    return this.env.GOOGLE_CLIENT_ID;
+  }
+
+  get googleClientSecret(): string {
+    return this.env.GOOGLE_CLIENT_SECRET;
+  }
+
+  get googleCallbackUrl(): string {
+    return this.env.GOOGLE_CALLBACK_URL;
+  }
+
+  get isGoogleAuthEnabled(): boolean {
+    return Boolean(this.env.GOOGLE_CLIENT_ID && this.env.GOOGLE_CLIENT_SECRET);
+  }
+
+  get smtpHost(): string {
+    return this.env.SMTP_HOST;
+  }
+
+  get smtpPort(): number {
+    return this.env.SMTP_PORT;
+  }
+
+  get smtpUser(): string {
+    return this.env.SMTP_USER;
+  }
+
+  get smtpPassword(): string {
+    return this.env.SMTP_PASSWORD;
+  }
+
+  get emailFrom(): string {
+    return this.env.EMAIL_FROM;
+  }
+
+  get isEmailDeliveryEnabled(): boolean {
+    return Boolean(this.env.SMTP_HOST && this.env.SMTP_USER);
+  }
+}
