@@ -87,40 +87,9 @@ syncode/
 - **pnpm**: >= 9.x / 10.x / 12.x
 - **Docker & Docker Compose**: For PostgreSQL 16 and Redis 7
 
-### 2. Environment Configuration
-Create a `.env` file in the project root:
 
-```env
-# Application
-NODE_ENV=development
-API_PORT=4000
-DATABASE_URL=postgresql://syncode:syncode_dev_password@localhost:5432/syncode?schema=public
-REDIS_URL=redis://localhost:6379
 
-# Authentication & JWT
-JWT_ACCESS_SECRET=your_super_secret_jwt_key_at_least_32_characters_long
-JWT_ACCESS_EXPIRATION=15m
-REFRESH_TOKEN_EXPIRATION_DAYS=7
-
-# Cookie Settings
-AUTH_COOKIE_NAME=syncode_refresh_token
-AUTH_COOKIE_SAME_SITE=lax
-AUTH_COOKIE_SECURE=false
-
-# Google OAuth (Optional in development)
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/google/callback
-
-# SMTP Email (Optional in development; falls back to console logging)
-SMTP_HOST=localhost
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=noreply@syncode.dev
-```
-
-### 3. Start Infrastructure
+### 2. Start Infrastructure
 ```bash
 # Start PostgreSQL & Redis in detached mode
 docker compose up -d
@@ -129,7 +98,7 @@ docker compose up -d
 docker compose ps
 ```
 
-### 4. Database Setup
+### 3. Database Setup
 ```bash
 # Generate Prisma client
 pnpm db:generate
@@ -138,7 +107,7 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
-### 5. Run Development Services
+### 4. Run Development Services
 ```bash
 pnpm dev
 ```
