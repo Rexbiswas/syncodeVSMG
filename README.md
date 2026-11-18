@@ -192,3 +192,26 @@ pnpm build
 - [System Architecture](file:///docs/ARCHITECTURE.md)
 - [REST API Specification](file:///docs/API.md)
 - [Developer Guide](file:///docs/DEVELOPMENT.md)
+
+
+## for test 
+<p><strong>login</strong></p>
+<p><a>admin@test.com</a></p>
+<p>12345678</p>
+<p><strong>From your SYNCODE project root, run</strong></p>
+pnpm install
+<br/>
+pnpm db:generate
+<br/>
+pnpm build
+<br/>
+pnpm typecheck
+<br/>
+pnpm lint
+<br/>
+pnpm test
+
+<p><strong>Then start the application:</strong></p>
+pnpm docker:up
+<br/>
+pnpm dev
