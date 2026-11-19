@@ -10,14 +10,14 @@
 
 SYNCODE is an enterprise-grade Universal Real-Time Code Collaboration Platform built to connect developers across different editors: **Visual Studio Code**, **JetBrains IDEs**, **Neovim**, and modern **Web browsers**.
 
----
+
 
 ## Roadmap Status
 
-- [x] **Phase 1: Foundation & Core Infrastructure** (Monorepo, Docker, NestJS API, Collaboration Service, Next.js frontend, Prisma, Redis)
-- [x] **Phase 2: Authentication & User Management** (Argon2id, JWT access tokens, HttpOnly refresh token rotation, session revocation, profile & security settings, protected routes)
+- [x] **Phase 1: Foundation & Core Infrastructure** 
+- [x] **Phase 2: Authentication & User Management** 
 - [x] **Phase 3: Project & Workspace Management**
-- [ ] **Phase 4: Real-Time Collaboration Engine (CRDT / Yjs)**
+- [x] **Phase 4: Real-Time Collaboration Engine (CRDT / Yjs)**
 - [ ] **Phase 5: Editor Extensions & Synchronization Adapter**
 - [ ] **Phase 6: Audio / Video & Presence Communication**
 - [ ] **Phase 7: Terminal & Execution Sharing**
@@ -41,7 +41,7 @@ SYNCODE is an enterprise-grade Universal Real-Time Code Collaboration Platform b
   - **HttpOnly, SameSite=Lax, Secure** refresh token cookies.
   - **Refresh Token Rotation & Replay Attack Defense**: Replay attempts instantly revoke all user sessions.
   - Granular multi-session tracking and revocation.
-- **Collaboration Microservice (`apps/collaboration`)**: Isolated real-time microservice foundation on port 4001 for future Yjs CRDT synchronization.
+- **Collaboration Engine (`apps/collaboration`)**: High-performance real-time microservice on port 4001 powered by Yjs CRDT, binary WebSockets, PostgreSQL bytea snapshot persistence with compaction, multi-instance Redis Pub/Sub cluster replication, and Yjs awareness presence.
 - **Database (`packages/database`)**: PostgreSQL 16 managed via Prisma ORM with automated migrations.
 - **Caching & Broker**: Redis 7 with `ioredis` connection lifecycle management, automated reconnection, and sliding-window rate limiting.
 - **Shared Packages (`packages/*`)**:

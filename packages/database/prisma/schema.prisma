@@ -215,9 +215,61 @@ model Room {
 
   workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy   User           @relation("RoomCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  documents   CollaborationDocument[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId])
   @@index([createdById])
   @@map("rooms")
+}
+
+// -----------------------------------------------------------------------------
+// Real-Time Collaboration & CRDT Persistence Models (Phase 4)
+// -----------------------------------------------------------------------------
+model CollaborationDocument {
+  id            String             @id @default(uuid())
+  roomId        String
+  documentKey   String             @default("default")
+  version       Int                @default(1)
+  snapshotData  Bytes?
+  snapshotClock Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  room          Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  updates       DocumentUpdate[]
+  snapshots     DocumentSnapshot[]
+
+  @@unique([roomId, documentKey])
+  @@index([roomId])
+  @@index([documentKey])
+  @@map("collaboration_documents")
+}
+
+model DocumentUpdate {
+  id             String                @id @default(uuid())
+  documentId     String
+  userId         String?
+  updateData     Bytes
+  sequenceNumber Int
+  createdAt      DateTime              @default(now())
+
+  document       CollaborationDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, sequenceNumber])
+  @@index([documentId, createdAt])
+  @@map("document_updates")
+}
+
+model DocumentSnapshot {
+  id           String                @id @default(uuid())
+  documentId   String
+  snapshotData Bytes
+  version      Int
+  createdAt    DateTime              @default(now())
+
+  document     CollaborationDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, version])
+  @@map("document_snapshots")
 }

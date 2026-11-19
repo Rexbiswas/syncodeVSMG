@@ -3,30 +3,32 @@ dotenv.config();
 
 import { createCollaborationServer } from './server.js';
 
-const { app, env, logger } = createCollaborationServer();
+async function bootstrap() {
+  const { server, env, logger, coordination, shutdown } = createCollaborationServer();
 
-const port = Number(env.COLLABORATION_PORT) || 4001;
-const host = env.COLLABORATION_HOST || '0.0.0.0';
+  const port = Number(env.COLLABORATION_PORT) || 4001;
+  const host = env.COLLABORATION_HOST || '0.0.0.0';
 
-const server = app.listen(port, host, () => {
-  logger.info(
-    `SYNCODE Collaboration Foundation Service running on http://${host}:${port}`,
-  );
-});
+  // Connect Redis coordination
+  await coordination.connect();
 
-function handleShutdown(signal: string) {
-  logger.info(`Received ${signal}. Shutting down collaboration server gracefully...`);
-  server.close(() => {
-    logger.info('Collaboration server closed cleanly.');
-    process.exit(0);
+  server.listen(port, host, () => {
+    logger.info(
+      `SYNCODE Real-Time Collaboration Engine running on http://${host}:${port} (WS Path: ${env.COLLABORATION_WS_PATH})`,
+    );
   });
 
-  setTimeout(() => {
-    logger.error('Forcefully terminating collaboration server after timeout.');
-    process.exit(1);
-  }, 10000).unref();
+  async function handleShutdown(signal: string) {
+    logger.info(`Received ${signal}. Shutting down collaboration server gracefully...`);
+    await shutdown();
+    process.exit(0);
+  }
+
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
 }
 
-process.on('SIGTERM', () => handleShutdown('SIGTERM'));
-process.on('SIGINT', () => handleShutdown('SIGINT'));
-
+bootstrap().catch((err) => {
+  console.error('Fatal error during collaboration server startup:', err);
+  process.exit(1);
+});

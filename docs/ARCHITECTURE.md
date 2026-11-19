@@ -76,10 +76,12 @@ The `GET /api/v1/health` endpoint tests end-to-end service availability:
 
 ---
 
-## 5. Phase 2 Roadmap & Future Pillars
+## 5. System Evolutionary Pillars
 
-1. **Yjs State Synchronization**: Binary delta exchanges over WebSocket connections.
-2. **Distributed Redis Adapter**: Multi-node horizontal scaling for document rooms.
-3. **WebRTC Media Engine**: Voice and video calling directly integrated into the collaborative session.
-4. **Room-Based Access Control**: Granular permissions (owner, editor, read-only observer).
+1. **Phase 1: Foundation & Monorepo Architecture** (Completed): Turborepo, pnpm workspaces, NestJS API, PostgreSQL, Redis, health monitoring.
+2. **Phase 2: Authentication & User Management** (Completed): JWT session rotation, OAuth 2.0, password security, email verification.
+3. **Phase 3: Workspaces & Room Management** (Completed): Multi-tenant workspaces, membership RBAC (OWNER, ADMIN, MEMBER, VIEWER), invitation lifecycle, collaboration rooms.
+4. **Phase 4: Real-Time Collaboration Engine** (Completed): Yjs CRDT binary WebSockets, persistent snapshots in PostgreSQL, multi-node replication via Redis Pub/Sub, awareness and presence. See [docs/COLLABORATION.md](./COLLABORATION.md).
+5. **Phase 5: Editor Integration & Monaco Engine** (Upcoming): In-browser Monaco editor binding, multi-cursor decorations, syntax highlighting.
+6. **Phase 6: Universal IDE Adapters** (Upcoming): VS Code, JetBrains, and Neovim extensions communicating over universal protocol contracts.
 

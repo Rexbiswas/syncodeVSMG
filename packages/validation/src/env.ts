@@ -73,8 +73,19 @@ export type WebEnv = z.infer<typeof webEnvSchema>;
 export const collaborationEnvSchema = z.object({
   NODE_ENV: z.enum(environments).default('development'),
   LOG_LEVEL: z.enum(logLevels).default('info'),
-  COLLABORATION_PORT: z.coerce.number().int().positive().default(4001),
+  COLLABORATION_PORT: z.coerce.number().int().nonnegative().default(4001),
   COLLABORATION_HOST: z.string().min(1).default('0.0.0.0'),
+  COLLABORATION_WS_PATH: z.string().default('/collaboration'),
+  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/syncode?schema=public'),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
+  JWT_ACCESS_SECRET: z
+    .string()
+    .min(16, 'JWT_ACCESS_SECRET must be at least 16 characters')
+    .default('syncode_super_secret_jwt_access_key_change_in_production_min32chars'),
+  COLLABORATION_MAX_PAYLOAD_BYTES: z.coerce.number().int().positive().default(1048576), // 1MB
+  COLLABORATION_PERSISTENCE_INTERVAL_MS: z.coerce.number().int().positive().default(5000), // 5s
+  COLLABORATION_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(300000), // 5m
 });
 
 export type CollaborationEnv = z.infer<typeof collaborationEnvSchema>;

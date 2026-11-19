@@ -68,7 +68,7 @@ pnpm --filter @syncode/web dev
 # REST API (NestJS) -> http://localhost:4000/api/v1
 pnpm --filter @syncode/api dev
 
-# Collaboration Foundation -> http://localhost:4001
+# Collaboration Real-Time Engine -> ws://localhost:4001/collaboration & http://localhost:4001/health
 pnpm --filter @syncode/collaboration dev
 ```
 
