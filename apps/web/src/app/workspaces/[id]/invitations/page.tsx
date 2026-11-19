@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, use, useCallback } from 'react';
 import { ProtectedRoute } from '@/components/protected-route';
 import { WorkspaceHeader } from '@/components/workspace-header';
 import { workspaceApi, type SendInvitationResponse } from '@/lib/workspace-api';
@@ -22,7 +22,7 @@ import {
   Clock,
 } from 'lucide-react';
 
-function WorkspaceInvitationsContent({
+export default function WorkspaceInvitationsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -338,9 +338,8 @@ function WorkspaceInvitationsContent({
                             {inv.email}
                           </span>
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
-                              statusBadgeStyles[inv.status] || statusBadgeStyles.PENDING
-                            }`}
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${statusBadgeStyles[inv.status] || statusBadgeStyles.PENDING
+                              }`}
                           >
                             {inv.status}
                           </span>
@@ -398,23 +397,5 @@ function WorkspaceInvitationsContent({
         )}
       </div>
     </ProtectedRoute>
-  );
-}
-
-export default function WorkspaceInvitationsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
-        </div>
-      }
-    >
-      <WorkspaceInvitationsContent params={params} />
-    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/protected-route';
 import { WorkspaceHeader } from '@/components/workspace-header';
@@ -28,7 +28,7 @@ import {
   X,
 } from 'lucide-react';
 
-function WorkspaceRoomsContent({
+export default function WorkspaceRoomsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -514,11 +514,10 @@ function WorkspaceRoomsContent({
                         <button
                           type="button"
                           onClick={() => setRoomVisibility(RoomVisibility.PRIVATE)}
-                          className={`p-3 rounded-xl border text-left text-xs ${
-                            roomVisibility === RoomVisibility.PRIVATE
-                              ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                              : 'border-zinc-200 dark:border-zinc-700'
-                          }`}
+                          className={`p-3 rounded-xl border text-left text-xs ${roomVisibility === RoomVisibility.PRIVATE
+                            ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                            : 'border-zinc-200 dark:border-zinc-700'
+                            }`}
                         >
                           <div className="font-semibold flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100">
                             <Lock className="w-3.5 h-3.5" /> Private
@@ -529,11 +528,10 @@ function WorkspaceRoomsContent({
                         <button
                           type="button"
                           onClick={() => setRoomVisibility(RoomVisibility.PUBLIC)}
-                          className={`p-3 rounded-xl border text-left text-xs ${
-                            roomVisibility === RoomVisibility.PUBLIC
-                              ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                              : 'border-zinc-200 dark:border-zinc-700'
-                          }`}
+                          className={`p-3 rounded-xl border text-left text-xs ${roomVisibility === RoomVisibility.PUBLIC
+                            ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                            : 'border-zinc-200 dark:border-zinc-700'
+                            }`}
                         >
                           <div className="font-semibold flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100">
                             <Globe className="w-3.5 h-3.5 text-sky-500" /> Public
@@ -630,11 +628,10 @@ function WorkspaceRoomsContent({
                         <button
                           type="button"
                           onClick={() => setEditVisibility(RoomVisibility.PRIVATE)}
-                          className={`p-3 rounded-xl border text-left text-xs ${
-                            editVisibility === RoomVisibility.PRIVATE
-                              ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                              : 'border-zinc-200 dark:border-zinc-700'
-                          }`}
+                          className={`p-3 rounded-xl border text-left text-xs ${editVisibility === RoomVisibility.PRIVATE
+                            ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                            : 'border-zinc-200 dark:border-zinc-700'
+                            }`}
                         >
                           <div className="font-semibold flex items-center gap-1.5">
                             <Lock className="w-3.5 h-3.5" /> Private
@@ -643,11 +640,10 @@ function WorkspaceRoomsContent({
                         <button
                           type="button"
                           onClick={() => setEditVisibility(RoomVisibility.PUBLIC)}
-                          className={`p-3 rounded-xl border text-left text-xs ${
-                            editVisibility === RoomVisibility.PUBLIC
-                              ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                              : 'border-zinc-200 dark:border-zinc-700'
-                          }`}
+                          className={`p-3 rounded-xl border text-left text-xs ${editVisibility === RoomVisibility.PUBLIC
+                            ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                            : 'border-zinc-200 dark:border-zinc-700'
+                            }`}
                         >
                           <div className="font-semibold flex items-center gap-1.5">
                             <Globe className="w-3.5 h-3.5 text-sky-500" /> Public
@@ -687,23 +683,5 @@ function WorkspaceRoomsContent({
         )}
       </div>
     </ProtectedRoute>
-  );
-}
-
-export default function WorkspaceRoomsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
-        </div>
-      }
-    >
-      <WorkspaceRoomsContent params={params} />
-    </Suspense>
   );
 }

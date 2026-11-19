@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/protected-route';
 import { WorkspaceHeader } from '@/components/workspace-header';
@@ -24,7 +24,7 @@ import {
   Globe,
 } from 'lucide-react';
 
-function WorkspaceSettingsContent({
+export default function WorkspaceSettingsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -306,11 +306,10 @@ function WorkspaceSettingsContent({
                     <button
                       type="button"
                       onClick={() => setVisibility(WorkspaceVisibility.PRIVATE)}
-                      className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${
-                        visibility === WorkspaceVisibility.PRIVATE
-                          ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                          : 'border-zinc-200 dark:border-zinc-800'
-                      }`}
+                      className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${visibility === WorkspaceVisibility.PRIVATE
+                        ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                        : 'border-zinc-200 dark:border-zinc-800'
+                        }`}
                     >
                       <Lock className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
                       <div>
@@ -324,11 +323,10 @@ function WorkspaceSettingsContent({
                     <button
                       type="button"
                       onClick={() => setVisibility(WorkspaceVisibility.PUBLIC)}
-                      className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${
-                        visibility === WorkspaceVisibility.PUBLIC
-                          ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
-                          : 'border-zinc-200 dark:border-zinc-800'
-                      }`}
+                      className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${visibility === WorkspaceVisibility.PUBLIC
+                        ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 ring-1 ring-purple-500'
+                        : 'border-zinc-200 dark:border-zinc-800'
+                        }`}
                     >
                       <Globe className="w-5 h-5 text-sky-500 flex-shrink-0 mt-0.5" />
                       <div>
@@ -492,23 +490,5 @@ function WorkspaceSettingsContent({
         )}
       </div>
     </ProtectedRoute>
-  );
-}
-
-export default function WorkspaceSettingsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
-        </div>
-      }
-    >
-      <WorkspaceSettingsContent params={params} />
-    </Suspense>
   );
 }
