@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback } from 'react';
+import React, { useEffect, useState, use, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/protected-route';
 import { WorkspaceHeader } from '@/components/workspace-header';
@@ -24,7 +24,7 @@ import {
   Globe,
 } from 'lucide-react';
 
-export default function WorkspaceSettingsPage({
+function WorkspaceSettingsContent({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -490,5 +490,23 @@ export default function WorkspaceSettingsPage({
         )}
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function WorkspaceSettingsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+        </div>
+      }
+    >
+      <WorkspaceSettingsContent params={params} />
+    </Suspense>
   );
 }

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { SpotlightCard } from '@/components/ui/spotlight-card';
 import { Badge } from '@/components/ui/badge';
+import { ProductShowcaseCarousel } from '@/components/product-showcase-carousel';
 import { CollaborationCta } from '@/components/collaboration-cta';
 import {
   Server,
@@ -501,6 +502,9 @@ export default function Home() {
               </SpotlightCard>
             </div>
           </div>
+
+          {/* Live Collaboration Experience Showcase Carousel */}
+          <ProductShowcaseCarousel />
 
           {/* Animated Collaboration CTA Section */}
           <CollaborationCta />

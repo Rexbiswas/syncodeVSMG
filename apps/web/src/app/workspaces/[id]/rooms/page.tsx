@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback } from 'react';
+import React, { useEffect, useState, use, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/protected-route';
 import { WorkspaceHeader } from '@/components/workspace-header';
@@ -28,7 +28,7 @@ import {
   X,
 } from 'lucide-react';
 
-export default function WorkspaceRoomsPage({
+function WorkspaceRoomsContent({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -683,5 +683,23 @@ export default function WorkspaceRoomsPage({
         )}
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function WorkspaceRoomsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+        </div>
+      }
+    >
+      <WorkspaceRoomsContent params={params} />
+    </Suspense>
   );
 }

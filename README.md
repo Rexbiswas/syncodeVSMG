@@ -209,7 +209,6 @@ pnpm typecheck
 pnpm lint
 <br/>
 pnpm test
-
 <p><strong>Then start the application:</strong></p>
 pnpm docker:up
 <br/>
