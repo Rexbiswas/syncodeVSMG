@@ -11,7 +11,6 @@ import {
   Volume2,
   VolumeX,
   Sparkles,
-  Layers,
   Radio,
   Video as VideoIcon,
 } from 'lucide-react';
@@ -29,7 +28,7 @@ export interface ShowcaseSlide {
   accentGlow: string;
   badge: {
     text: string;
-    icon: 'sparkles' | 'video' | 'layers';
+    icon: 'sparkles' | 'video';
   };
 }
 
@@ -64,21 +63,6 @@ const SHOWCASE_SLIDES: ShowcaseSlide[] = [
     badge: {
       text: 'Live 1080p Video',
       icon: 'video',
-    },
-  },
-  {
-    id: 'developer-architecture',
-    tag: 'Cross-IDE Engine',
-    eyebrow: 'DISTRIBUTED STATE PROTOCOL',
-    title: 'Zero-Conflict State Protocol',
-    description:
-      'Engineered with Yjs CRDT vector clocks and NestJS distributed microservices to ensure sub-50ms deterministic updates across thousands of peers.',
-    type: 'image',
-    src: '/media/syncode-collaboration.jpg',
-    accentGlow: 'rgba(56, 189, 248, 0.22)',
-    badge: {
-      text: 'Sub-50ms Latency',
-      icon: 'layers',
     },
   },
 ];
@@ -234,14 +218,12 @@ export function ProductShowcaseCarousel() {
     }),
   };
 
-  const renderBadgeIcon = (icon: 'sparkles' | 'video' | 'layers') => {
+  const renderBadgeIcon = (icon: 'sparkles' | 'video') => {
     switch (icon) {
       case 'sparkles':
         return <Sparkles className="h-3 w-3" />;
       case 'video':
         return <VideoIcon className="h-3 w-3" />;
-      case 'layers':
-        return <Layers className="h-3 w-3" />;
       default:
         return <Sparkles className="h-3 w-3" />;
     }
