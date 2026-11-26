@@ -19,6 +19,7 @@ import {
   Terminal,
   ExternalLink,
   ArrowRight,
+  WrapText,
 } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
@@ -56,6 +57,23 @@ export default function Home() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<'syncode.ts' | 'protocol.ts'>('syncode.ts');
+  const [isWordWrap, setIsWordWrap] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Automatically enable word wrap on mobile viewports (< 640px)
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      queueMicrotask(() => setIsWordWrap(true));
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        setIsWordWrap((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -264,17 +282,40 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Active Collaborators Presence Indicator */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="hidden sm:inline text-[11px] font-mono text-zinc-400">3 IDEs Connected</span>
+              {/* Controls: Word Wrap & Active Presence Indicator */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsWordWrap((prev) => !prev)}
+                  className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-[11px] font-mono flex items-center gap-1 transition-all border cursor-pointer ${
+                    isWordWrap
+                      ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10'
+                      : 'bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700'
+                  }`}
+                  title="Toggle Word Wrap (Alt+Z)"
+                  aria-label="Toggle Word Wrap"
+                >
+                  <WrapText className="h-3 w-3" />
+                  <span className="hidden xs:inline sm:inline">Wrap: {isWordWrap ? 'ON' : 'OFF'}</span>
+                </button>
+
+                <div className="flex items-center gap-1.5 pl-0.5">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="hidden sm:inline text-[11px] font-mono text-zinc-400">3 IDEs Connected</span>
+                </div>
               </div>
             </div>
 
             {/* Code Body with Real-Time Multi-IDE Remote Cursors */}
-            <div className="p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto bg-zinc-950/95 selection:bg-emerald-500/30 selection:text-emerald-200">
+            <div className="p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto custom-editor-scrollbar bg-zinc-950/95 selection:bg-emerald-500/30 selection:text-emerald-200">
               {activeTab === 'syncode.ts' ? (
-                <div className="space-y-1 sm:space-y-1.5 text-zinc-300 min-w-max whitespace-nowrap">
+                <div
+                  className={`space-y-1 sm:space-y-1.5 text-zinc-300 ${
+                    isWordWrap
+                      ? 'whitespace-pre-wrap break-words'
+                      : 'min-w-max whitespace-nowrap'
+                  }`}
+                >
                   <div className="text-zinc-500">&#47;&#47; Universal Real-Time Session &mdash; SYNCODE Phase 1</div>
                   <div>
                     <span className="text-purple-400">import</span> &#123;{' '}
@@ -355,7 +396,13 @@ export default function Home() {
                   <div>&#125;</div>
                 </div>
               ) : (
-                <div className="space-y-1 sm:space-y-1.5 text-zinc-300 min-w-max whitespace-nowrap">
+                <div
+                  className={`space-y-1 sm:space-y-1.5 text-zinc-300 ${
+                    isWordWrap
+                      ? 'whitespace-pre-wrap break-words'
+                      : 'min-w-max whitespace-nowrap'
+                  }`}
+                >
                   <div className="text-zinc-500">&#47;&#47; Protocol Specification Contract (v1.0.0)</div>
                   <div>
                     <span className="text-purple-400">export const</span>{' '}
@@ -390,6 +437,15 @@ export default function Home() {
                 <span className="hidden sm:inline">TypeScript 5.x</span>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsWordWrap((prev) => !prev)}
+                  className="hover:text-purple-400 transition-colors cursor-pointer flex items-center gap-1 text-[10px] sm:text-[11px]"
+                  title="Toggle Word Wrap (Alt+Z)"
+                >
+                  <WrapText className="h-3 w-3" />
+                  <span>Wrap: {isWordWrap ? 'ON' : 'OFF'}</span>
+                </button>
                 <span className="hidden sm:inline">Ln 12, Col 28</span>
                 <span className="text-sky-400">Yjs CRDT Active</span>
               </div>

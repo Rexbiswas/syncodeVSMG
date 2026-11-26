@@ -13,7 +13,7 @@ SYNCODE is an enterprise-grade Universal Real-Time Code Collaboration Platform b
 
 
 ## Roadmap Status
-
+- [x] **Phase 0: core UI changes and improvement with new design system** 
 - [x] **Phase 1: Foundation & Core Infrastructure** 
 - [x] **Phase 2: Authentication & User Management** 
 - [x] **Phase 3: Project & Workspace Management**
