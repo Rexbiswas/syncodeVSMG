@@ -93,12 +93,6 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-2 pl-3 border-l border-zinc-200 dark:border-zinc-800">
               <Link
-                href="/login"
-                className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white px-3 py-1.5 rounded-md transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
                 href="/register"
                 className="text-sm font-medium bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
               >
@@ -110,7 +104,7 @@ export function Navbar() {
 
         {/* Mobile Navigation Controls (Visible ONLY on Mobile < md) */}
         <div className="flex md:hidden items-center gap-2">
-          {isAuthenticated && user ? (
+          {isAuthenticated && user && (
             <Link
               href="/dashboard"
               className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:ring-2 hover:ring-zinc-400 transition-all mr-1"
@@ -119,13 +113,6 @@ export function Navbar() {
               {user.displayName
                 ? user.displayName.slice(0, 2).toUpperCase()
                 : user.username.slice(0, 2).toUpperCase()}
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-md text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-            >
-              Sign In
             </Link>
           )}
 
@@ -234,20 +221,13 @@ export function Navbar() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <Link
-                      href="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full text-center px-4 py-2 rounded-lg text-sm font-medium border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-                    >
-                      Sign In
-                    </Link>
+                  <div className="pt-1">
                     <Link
                       href="/register"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full text-center px-4 py-2 rounded-lg text-sm font-medium bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-sm"
+                      className="w-full block text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-sm"
                     >
-                      Register
+                      Get Started Free
                     </Link>
                   </div>
                 )}

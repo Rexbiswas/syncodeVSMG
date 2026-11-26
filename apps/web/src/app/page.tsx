@@ -272,9 +272,9 @@ export default function Home() {
             </div>
 
             {/* Code Body with Real-Time Multi-IDE Remote Cursors */}
-            <div className="p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto bg-zinc-950/95 selection:bg-emerald-500/30 selection:text-emerald-200">
+            <div className="p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto bg-zinc-950/95 selection:bg-emerald-500/30 selection:text-emerald-200">
               {activeTab === 'syncode.ts' ? (
-                <div className="space-y-1.5 text-zinc-300">
+                <div className="space-y-1 sm:space-y-1.5 text-zinc-300 min-w-max whitespace-nowrap">
                   <div className="text-zinc-500">&#47;&#47; Universal Real-Time Session &mdash; SYNCODE Phase 1</div>
                   <div>
                     <span className="text-purple-400">import</span> &#123;{' '}
@@ -296,17 +296,17 @@ export default function Home() {
                     <span className="text-orange-300">workspaceId</span>:{' '}
                     <span className="text-sky-300">string</span>) &#123;
                   </div>
-                  <div className="pl-4">
+                  <div className="pl-3 sm:pl-4">
                     <span className="text-purple-400">const</span> session ={' '}
                     <span className="text-purple-400">await</span> CollaborationEngine.
                     <span className="text-yellow-300">connect</span>(&#123;
                   </div>
-                  <div className="pl-8">
+                  <div className="pl-6 sm:pl-8">
                     workspaceId,
                   </div>
                   
                   {/* Remote Cursor 1: VS Code (Alex) */}
-                  <div className="pl-8 relative inline-flex items-center">
+                  <div className="pl-6 sm:pl-8 relative inline-flex items-center">
                     <span>transport: </span>
                     <span className="text-emerald-300 ml-1">&apos;websocket+webrtc&apos;</span>,
                     <motion.div
@@ -314,14 +314,14 @@ export default function Home() {
                       transition={{ repeat: Infinity, duration: 1 }}
                       className="ml-1 h-4 w-[2px] bg-sky-400"
                     />
-                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-sky-500 text-white shadow-sm flex items-center gap-1 select-none">
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-sky-500 text-white shadow-sm inline-flex items-center gap-1 select-none whitespace-nowrap shrink-0">
                       <span>Alex</span>
                       <span className="text-[8px] opacity-80 uppercase tracking-tighter">(VS Code)</span>
                     </span>
                   </div>
 
                   {/* Remote Cursor 2: JetBrains (Priya) */}
-                  <div className="pl-8 relative flex items-center">
+                  <div className="pl-6 sm:pl-8 relative flex items-center">
                     <span>crdtStrategy: </span>
                     <span className="text-emerald-300 ml-1">&apos;yjs-delta-sync&apos;</span>,
                     <motion.div
@@ -329,33 +329,33 @@ export default function Home() {
                       transition={{ repeat: Infinity, duration: 0.8 }}
                       className="ml-1 h-4 w-[2px] bg-emerald-400"
                     />
-                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-emerald-600 text-white shadow-sm flex items-center gap-1 select-none">
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-emerald-600 text-white shadow-sm inline-flex items-center gap-1 select-none whitespace-nowrap shrink-0">
                       <span>Priya</span>
                       <span className="text-[8px] opacity-80 uppercase tracking-tighter">(JetBrains)</span>
                     </span>
                   </div>
 
                   {/* Remote Cursor 3: Neovim (Liam) */}
-                  <div className="pl-4 relative flex items-center">
+                  <div className="pl-3 sm:pl-4 relative flex items-center">
                     <span>&#125;);</span>
                     <motion.div
                       animate={{ opacity: [1, 0, 1] }}
                       transition={{ repeat: Infinity, duration: 1.2 }}
                       className="ml-1 h-4 w-[2px] bg-amber-400"
                     />
-                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-amber-600 text-white shadow-sm flex items-center gap-1 select-none">
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-sans bg-amber-600 text-white shadow-sm inline-flex items-center gap-1 select-none whitespace-nowrap shrink-0">
                       <span>Liam</span>
                       <span className="text-[8px] opacity-80 uppercase tracking-tighter">(Neovim)</span>
                     </span>
                   </div>
 
-                  <div className="pl-4">
+                  <div className="pl-3 sm:pl-4">
                     <span className="text-purple-400">return</span> session;
                   </div>
                   <div>&#125;</div>
                 </div>
               ) : (
-                <div className="space-y-1.5 text-zinc-300">
+                <div className="space-y-1 sm:space-y-1.5 text-zinc-300 min-w-max whitespace-nowrap">
                   <div className="text-zinc-500">&#47;&#47; Protocol Specification Contract (v1.0.0)</div>
                   <div>
                     <span className="text-purple-400">export const</span>{' '}
@@ -367,13 +367,13 @@ export default function Home() {
                     <span className="text-purple-400">export enum</span>{' '}
                     <span className="text-yellow-300">MessageType</span> &#123;
                   </div>
-                  <div className="pl-4 text-sky-300">
+                  <div className="pl-3 sm:pl-4 text-sky-300">
                     CLIENT_HANDSHAKE = <span className="text-emerald-300">&apos;sys:client_handshake&apos;</span>,
                   </div>
-                  <div className="pl-4 text-sky-300">
+                  <div className="pl-3 sm:pl-4 text-sky-300">
                     AWARENESS_UPDATE = <span className="text-emerald-300">&apos;awareness:update&apos;</span>,
                   </div>
-                  <div className="pl-4 text-sky-300">
+                  <div className="pl-3 sm:pl-4 text-sky-300">
                     DOC_UPDATE = <span className="text-emerald-300">&apos;doc:update&apos;</span>,
                   </div>
                   <div>&#125;</div>
