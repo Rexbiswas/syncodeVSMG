@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -17,6 +18,7 @@ import {
   CheckCircle2,
   Terminal,
   ExternalLink,
+  ArrowRight,
 } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
@@ -166,7 +168,7 @@ export default function Home() {
         >
           <motion.h1
             variants={heroItemVariants}
-            className="text-4xl font-extrabold tracking-tight sm:text-6xl text-zinc-900 dark:text-zinc-50 max-w-4xl leading-[1.12]"
+            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 max-w-4xl leading-[1.12]"
           >
             Universal Real-Time{' '}
             <span className="bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 dark:from-zinc-100 dark:via-zinc-400 dark:to-zinc-100 bg-clip-text text-transparent">
@@ -177,7 +179,7 @@ export default function Home() {
 
           <motion.p
             variants={heroItemVariants}
-            className="max-w-2xl text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed"
+            className="max-w-2xl text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed px-2 sm:px-0"
           >
             Seamlessly collaborate across VS Code, JetBrains, Neovim, and the web.
             Powered by CRDT state synchronization, high-performance NestJS microservices, and modern TypeScript architecture.
@@ -185,8 +187,21 @@ export default function Home() {
 
           <motion.div
             variants={heroItemVariants}
-            className="flex flex-wrap items-center justify-center gap-4 pt-2"
+            className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2"
           >
+            <motion.div
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+            >
+              <Link href="/register">
+                <Button size="lg" className="gap-2 shadow-lg shadow-purple-500/20 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                  <span>Get Started Free</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
+
             <motion.div
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -210,16 +225,16 @@ export default function Home() {
         <div ref={editorPreviewRef} className="mt-14 max-w-4xl mx-auto">
           <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-950 text-zinc-50 shadow-2xl shadow-zinc-900/10 dark:shadow-black/70 overflow-hidden backdrop-blur-xl">
             {/* Editor Window Titlebar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-900/60 text-xs">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-zinc-800/80 bg-zinc-900/60 text-xs">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-red-500/80" />
-                  <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-                  <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-red-500/80" />
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-amber-500/80" />
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-500/80" />
                 </div>
-                <div className="ml-3 flex items-center gap-1 font-mono text-zinc-400">
-                  <Terminal className="h-3.5 w-3.5 text-zinc-400" />
-                  <span>syncode-workspace</span>
+                <div className="ml-1 sm:ml-3 flex items-center gap-1 font-mono text-zinc-400">
+                  <Terminal className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                  <span className="hidden sm:inline">syncode-workspace</span>
                 </div>
               </div>
 
@@ -228,7 +243,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('syncode.ts')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-colors ${
                     activeTab === 'syncode.ts'
                       ? 'bg-zinc-800 text-zinc-100 font-semibold'
                       : 'text-zinc-500 hover:text-zinc-300'
@@ -239,7 +254,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('protocol.ts')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-colors ${
                     activeTab === 'protocol.ts'
                       ? 'bg-zinc-800 text-zinc-100 font-semibold'
                       : 'text-zinc-500 hover:text-zinc-300'
@@ -250,9 +265,9 @@ export default function Home() {
               </div>
 
               {/* Active Collaborators Presence Indicator */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] font-mono text-zinc-400">3 IDEs Connected</span>
+                <span className="hidden sm:inline text-[11px] font-mono text-zinc-400">3 IDEs Connected</span>
               </div>
             </div>
 
@@ -367,15 +382,15 @@ export default function Home() {
             </div>
 
             {/* Editor Window Footer Status Bar */}
-            <div className="flex items-center justify-between px-4 py-2 border-t border-zinc-800/80 bg-zinc-900/40 text-[11px] font-mono text-zinc-500">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-t border-zinc-800/80 bg-zinc-900/40 text-[10px] sm:text-[11px] font-mono text-zinc-500">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1 text-emerald-400">
                   <CheckCircle2 className="h-3 w-3" /> UTF-8
                 </span>
-                <span>TypeScript 5.x</span>
+                <span className="hidden sm:inline">TypeScript 5.x</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span>Ln 12, Col 28</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="hidden sm:inline">Ln 12, Col 28</span>
                 <span className="text-sky-400">Yjs CRDT Active</span>
               </div>
             </div>

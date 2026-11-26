@@ -272,7 +272,7 @@ export function ProductShowcaseCarousel() {
             <span>LIVE COLLABORATION EXPERIENCE</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-[1.15]">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-[1.15]">
             Code Together.{' '}
             <span className="bg-gradient-to-r from-purple-500 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
               Build Together.
@@ -345,7 +345,7 @@ export function ProductShowcaseCarousel() {
                     />
 
                     {/* Minimal Media Controls Overlay */}
-                    <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 z-20">
+                    <div className="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/10 z-20">
                       <button
                         type="button"
                         onClick={toggleVideoPlayback}
@@ -398,8 +398,8 @@ export function ProductShowcaseCarousel() {
             </AnimatePresence>
 
             {/* In-Frame Corner Pill Badge */}
-            <div className="absolute top-4 left-4 z-20">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium tracking-wide bg-zinc-900/80 backdrop-blur-md text-zinc-200 border border-white/10 shadow-lg">
+            <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-20">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-medium tracking-wide bg-zinc-900/80 backdrop-blur-md text-zinc-200 border border-white/10 shadow-lg">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 {currentSlide.badge.text}
               </span>

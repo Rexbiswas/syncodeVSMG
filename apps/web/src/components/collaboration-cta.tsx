@@ -115,7 +115,7 @@ export function CollaborationCta() {
         <div className="pointer-events-none absolute inset-0 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80" />
 
         {/* Inner Card Background & Content */}
-        <div className="relative overflow-hidden rounded-[22.5px] bg-white/85 dark:bg-zinc-900/80 backdrop-blur-2xl p-8 sm:p-14">
+        <div className="relative overflow-hidden rounded-[22.5px] bg-white/85 dark:bg-zinc-900/80 backdrop-blur-2xl p-6 sm:p-14">
           {/* Dynamic Full-Box Ambient Mesh Glowing Behind Content */}
           <motion.div
             animate={{
@@ -148,7 +148,7 @@ export function CollaborationCta() {
 
           <div className="relative z-10 mx-auto max-w-3xl text-center py-4">
             {/* Headline */}
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50 leading-tight">
+            <h2 className="text-2xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-zinc-900 dark:text-zinc-50 leading-tight">
               <span>Bridge Any Editor.</span>
               <span className="block mt-2.5 sm:mt-3 text-lg sm:text-xl md:text-2xl font-mono font-medium text-zinc-500 dark:text-zinc-400 tracking-tight">
                 <span>{typedText || '\u00A0'}</span>
