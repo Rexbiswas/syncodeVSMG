@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, use, useCallback, Suspense } from 'react';
 import Link from 'next/link';
+import type * as monacoType from 'monaco-editor';
 import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/context/auth-context';
 import { workspaceApi } from '@/lib/workspace-api';
@@ -11,10 +12,9 @@ import {
   type CollaborationParticipant,
 } from '@/lib/collaboration-client';
 import type { RoomItem, WorkspaceDetail } from '@syncode/validation';
-import {
-  CollaborationErrorCode,
-  type CollaborationRoomInfoPayload,
-  type CollaborationErrorPayload,
+import type {
+  CollaborationRoomInfoPayload,
+  CollaborationErrorPayload,
 } from '@syncode/protocol';
 import {
   ChevronRight,
@@ -27,14 +27,24 @@ import {
   RefreshCw,
   Sparkles,
   Loader2,
-  Users,
   Copy,
   Check,
   AlertTriangle,
-  FileCode,
   WifiOff,
   Eye,
+  ShieldCheck,
 } from 'lucide-react';
+import { MonacoCodeEditor } from '@/components/editor/monaco-code-editor';
+import { EditorTabBar } from '@/components/editor/editor-tab-bar';
+import { CollaboratorRoster } from '@/components/editor/collaborator-roster';
+import { EditorSettingsDialog } from '@/components/editor/editor-settings-dialog';
+import {
+  type EditorSettings,
+  loadEditorSettings,
+  saveEditorSettings,
+} from '@/lib/editor-settings';
+import { DEFAULT_ROOM_TABS, type EditorTab } from '@/lib/editor-tabs';
+import { getLanguageFromFilename } from '@/lib/editor-languages';
 
 function RoomDetailContent({
   params,
@@ -52,17 +62,29 @@ function RoomDetailContent({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Tabs & File Buffers
+  const [tabs, setTabs] = useState<EditorTab[]>(DEFAULT_ROOM_TABS);
+  const [activeTabId, setActiveTabId] = useState<string>(DEFAULT_ROOM_TABS[0].id);
+
+  // Editor Settings & UI State
+  const [settings, setSettings] = useState<EditorSettings>(() => loadEditorSettings());
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isRosterOpen, setIsRosterOpen] = useState<boolean>(true);
+
   // Real-time Collaboration States
   const [collabStatus, setCollabStatus] = useState<ConnectionStatus>('CONNECTING');
   const [participants, setParticipants] = useState<CollaborationParticipant[]>([]);
   const [roomInfo, setRoomInfo] = useState<CollaborationRoomInfoPayload | null>(null);
   const [collabError, setCollabError] = useState<CollaborationErrorPayload | null>(null);
-  const [codeContent, setCodeContent] = useState<string>('');
   const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({ line: 1, column: 1 });
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [collabClient, setCollabClient] = useState<CollaborationClient | null>(null);
 
   const clientRef = useRef<CollaborationClient | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
+
+  const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+  const activeDocumentKey = activeTab.documentKey;
 
   const loadData = useCallback(() => {
     setIsLoading(true);
@@ -127,7 +149,7 @@ function RoomDetailContent({
     };
   }, [workspaceId, roomId]);
 
-  // Connect to Collaboration Engine when Room & Token are ready
+  // Connect to Collaboration Engine when Room, Token, and Document Key are ready
   useEffect(() => {
     if (!room || !accessToken) return;
 
@@ -137,7 +159,7 @@ function RoomDetailContent({
       wsUrl,
       token: accessToken,
       roomId: room.id,
-      documentKey: 'main.ts',
+      documentKey: activeDocumentKey,
       onStatusChange: (status) => {
         setCollabStatus(status);
       },
@@ -150,50 +172,36 @@ function RoomDetailContent({
       onError: (err) => {
         setCollabError(err);
       },
-      onDocChange: (newContent) => {
-        setCodeContent(newContent);
-      },
     });
 
     clientRef.current = client;
+    queueMicrotask(() => {
+      setCollabClient(client);
+    });
     client.connect();
 
     return () => {
       client.destroy();
       clientRef.current = null;
+      setCollabClient(null);
     };
-  }, [room, accessToken]);
+  }, [room, accessToken, activeDocumentKey]);
 
-  // Handle user typing into the collaborative text area
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (roomInfo?.isReadOnly) {
-      setCollabError({
-        code: CollaborationErrorCode.READ_ONLY_VIOLATION,
-        message: 'You have Viewer permissions and cannot modify this document.',
-        fatal: false,
-      });
-      return;
-    }
+  // Keyboard shortcut listener (Alt+Z for Word Wrap)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        setSettings((prev) => {
+          const nextWrap = prev.wordWrap === 'on' ? 'off' : 'on';
+          return saveEditorSettings({ wordWrap: nextWrap });
+        });
+      }
+    };
 
-    const newText = e.target.value;
-    setCodeContent(newText);
-    if (clientRef.current) {
-      clientRef.current.setContent(newText);
-    }
-  };
-
-  // Track cursor position in awareness
-  const handleSelectionChange = () => {
-    if (!textareaRef.current || !clientRef.current) return;
-    const pos = textareaRef.current.selectionStart || 0;
-    const textBeforeCursor = textareaRef.current.value.substring(0, pos);
-    const lines = textBeforeCursor.split('\n');
-    const line = lines.length;
-    const column = lines[lines.length - 1].length + 1;
-
-    setCursorPos({ line, column });
-    clientRef.current.updateCursor(line, column);
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const copyRoomLink = () => {
     if (typeof window !== 'undefined') {
@@ -210,11 +218,56 @@ function RoomDetailContent({
     }
   };
 
+  const handleToggleWordWrap = () => {
+    setSettings((prev) => {
+      const nextWrap = prev.wordWrap === 'on' ? 'off' : 'on';
+      return saveEditorSettings({ wordWrap: nextWrap });
+    });
+  };
+
+  const handleFormatDocument = () => {
+    if (editorRef.current) {
+      editorRef.current.getAction('editor.action.formatDocument')?.run();
+    }
+  };
+
+  const handleTabSelect = (tabId: string) => {
+    setActiveTabId(tabId);
+  };
+
+  const handleTabClose = (tabId: string) => {
+    if (tabs.length <= 1) return;
+    const remaining = tabs.filter((t) => t.id !== tabId);
+    setTabs(remaining);
+    if (activeTabId === tabId) {
+      setActiveTabId(remaining[0].id);
+    }
+  };
+
+  const handleTabAdd = (name: string, languageId: string) => {
+    const newId = `tab-${Date.now()}`;
+    const detected = getLanguageFromFilename(name);
+    const newTab: EditorTab = {
+      id: newId,
+      name,
+      language: languageId || detected.id,
+      documentKey: name,
+    };
+    setTabs((prev) => [...prev, newTab]);
+    setActiveTabId(newId);
+  };
+
+  const handleLanguageChange = (languageId: string) => {
+    setTabs((prev) =>
+      prev.map((t) => (t.id === activeTabId ? { ...t, language: languageId } : t)),
+    );
+  };
+
   const loadSampleCode = () => {
     if (roomInfo?.isReadOnly) return;
-    const sample = `// SYNCODE Real-Time Collaboration Session
-// Document: main.ts
-// Engine: Yjs CRDT + Binary WebSockets
+    const sample = `// SYNCODE Real-Time Universal Code Collaboration Session
+// Document: ${activeDocumentKey}
+// CRDT Engine: Yjs State Vectors + Lib0 Binary Protocol
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -224,7 +277,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   
   await app.listen(4000);
-  console.log('SYNCODE API Gateway active on http://localhost:4000');
+  console.log('⚡ SYNCODE Engine running on port 4000');
 }
 
 bootstrap();
@@ -234,70 +287,72 @@ bootstrap();
     }
   };
 
+  const isReadOnly = Boolean(roomInfo?.isReadOnly);
+
   return (
     <ProtectedRoute>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <nav className="flex items-center gap-2 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
           <Link
             href="/dashboard"
             className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
           >
             Dashboard
           </Link>
-          <ChevronRight className="w-4 h-4 text-zinc-400" />
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
           <Link
             href={`/workspaces/${workspaceId}`}
             className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors truncate max-w-xs"
           >
             {workspace?.name || 'Workspace'}
           </Link>
-          <ChevronRight className="w-4 h-4 text-zinc-400" />
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
           <Link
             href={`/workspaces/${workspaceId}/rooms`}
             className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
           >
             Rooms
           </Link>
-          <ChevronRight className="w-4 h-4 text-zinc-400" />
-          <span className="text-zinc-900 dark:text-zinc-100 font-medium truncate">
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+          <span className="text-zinc-900 dark:text-zinc-100 font-semibold truncate">
             {room?.name || 'Room'}
           </span>
         </nav>
 
         {isLoading ? (
-          <div className="p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-zinc-200 dark:bg-zinc-800 rounded" />
-            <div className="h-4 w-72 bg-zinc-100 dark:bg-zinc-800/60 rounded" />
-            <div className="h-96 w-full bg-zinc-100 dark:bg-zinc-800/40 rounded mt-6" />
+          <div className="p-8 rounded-2xl bg-[#111116] border border-zinc-800 shadow-sm animate-pulse space-y-4">
+            <div className="h-8 w-48 bg-zinc-800 rounded" />
+            <div className="h-4 w-72 bg-zinc-800/60 rounded" />
+            <div className="h-96 w-full bg-zinc-800/40 rounded mt-6" />
           </div>
         ) : error || !room ? (
-          <div className="p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-900/60 text-center space-y-4">
-            <div className="text-red-600 dark:text-red-400 font-semibold">{error}</div>
+          <div className="p-8 rounded-2xl bg-[#111116] border border-red-900/60 text-center space-y-4">
+            <div className="text-red-400 font-semibold">{error}</div>
             <button
               onClick={loadData}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 text-zinc-900 text-sm font-medium hover:bg-white"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Retry</span>
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Room Info Header */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <div className="space-y-5">
+            {/* Room Header Strip */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#111116] border border-zinc-800 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white">
                     {room.name}
                   </h1>
-                  <span className="font-mono text-xs px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
+                  <span className="font-mono text-xs px-2.5 py-0.5 rounded-md bg-zinc-900 text-purple-400 border border-purple-500/20">
                     #{room.slug}
                   </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center gap-1">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-zinc-900 text-zinc-300 border border-zinc-800 flex items-center gap-1">
                     {room.visibility === 'PUBLIC' ? (
                       <>
-                        <Globe className="w-3 h-3 text-sky-500" /> Public
+                        <Globe className="w-3 h-3 text-sky-400" /> Public
                       </>
                     ) : (
                       <>
@@ -305,8 +360,12 @@ bootstrap();
                       </>
                     )}
                   </span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" />
+                    Role: {roomInfo?.role || workspace?.currentUserRole || 'MEMBER'}
+                  </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-zinc-400">
+                <div className="flex items-center gap-3 text-xs text-zinc-400">
                   <span className="flex items-center gap-1">
                     <User className="w-3.5 h-3.5" />
                     Created by @{room.createdBy.username}
@@ -320,38 +379,71 @@ bootstrap();
               </div>
 
               {/* Action Buttons & Status Badge */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Connection Status Badge */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-800 bg-[#0d0d12]">
+                  {collabStatus === 'CONNECTED' ? (
+                    <>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-xs font-semibold text-emerald-400">Live Sync</span>
+                    </>
+                  ) : collabStatus === 'CONNECTING' || collabStatus === 'RECONNECTING' ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                      <span className="text-xs font-medium text-amber-400">{collabStatus}</span>
+                    </>
+                  ) : (
+                    <>
+                      <WifiOff className="w-3.5 h-3.5 text-red-400" />
+                      <span className="text-xs font-medium text-red-400">{collabStatus}</span>
+                      <button
+                        onClick={handleReconnect}
+                        className="text-zinc-400 hover:text-white ml-1"
+                        title="Reconnect"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Share Room Button */}
                 <button
                   onClick={copyRoomLink}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-semibold text-zinc-200 hover:bg-zinc-800 hover:text-white transition-colors"
                 >
-                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedLink ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                  )}
                   <span>{copiedLink ? 'Link Copied' : 'Share Room'}</span>
                 </button>
 
+                {/* Back to Rooms */}
                 <Link
                   href={`/workspaces/${workspaceId}/rooms`}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-semibold text-zinc-200 hover:bg-zinc-800 hover:text-white transition-colors"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Rooms</span>
                 </Link>
               </div>
             </div>
 
             {/* Read-Only Warning Banner */}
-            {roomInfo?.isReadOnly && (
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs flex items-center justify-between">
+            {isReadOnly && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 flex-shrink-0" />
                   <span>
-                    <strong>View-Only Room Access:</strong> You are signed in as a Viewer. You can observe live collaborative code changes, but editing is disabled.
+                    <strong>View-Only Room Access:</strong> You are signed in as a Viewer. You can observe live collaborative code edits in real-time, but write actions are disabled.
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Error Notification Banner */}
+            {/* Collaboration Error Banner */}
             {collabError && (
               <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -367,212 +459,103 @@ bootstrap();
               </div>
             )}
 
-            {/* Phase 4 Live Collaboration Engine Surface */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Left / Main Column: Collaborative Code Workspace */}
-              <div className="lg:col-span-3 space-y-4">
-                <div className="rounded-2xl bg-zinc-950 border border-zinc-800 shadow-xl overflow-hidden flex flex-col">
-                  {/* Editor Header Bar */}
-                  <div className="px-4 py-3 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-300">
-                        <FileCode className="w-3.5 h-3.5 text-purple-400" />
-                        <span>main.ts</span>
-                      </div>
-                      <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">
-                        CRDT Document Key: main.ts
-                      </span>
-                    </div>
+            {/* Main Full-Featured Code Editor Container */}
+            <div className="rounded-2xl border border-zinc-800 bg-[#0d0d12] shadow-2xl overflow-hidden flex flex-col">
+              {/* Top Tab Bar & Action Controls */}
+              <EditorTabBar
+                tabs={tabs}
+                activeTabId={activeTabId}
+                onSelectTab={handleTabSelect}
+                onCloseTab={handleTabClose}
+                onAddTab={handleTabAdd}
+                currentLanguage={activeTab.language}
+                onLanguageChange={handleLanguageChange}
+                isWordWrap={settings.wordWrap === 'on'}
+                onToggleWordWrap={handleToggleWordWrap}
+                onFormatDocument={handleFormatDocument}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                isReadOnly={isReadOnly}
+              />
 
-                    <div className="flex items-center gap-3">
-                      {/* Connection Status Badge */}
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border bg-zinc-900">
-                        {collabStatus === 'CONNECTED' ? (
-                          <>
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-emerald-400">Live Sync</span>
-                          </>
-                        ) : collabStatus === 'CONNECTING' || collabStatus === 'RECONNECTING' ? (
-                          <>
-                            <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />
-                            <span className="text-amber-400">{collabStatus}</span>
-                          </>
-                        ) : (
-                          <>
-                            <WifiOff className="w-3 h-3 text-red-400" />
-                            <span className="text-red-400">{collabStatus}</span>
-                          </>
-                        )}
-                      </div>
+              {/* Editor Workspace & Collaborator Side-Pane */}
+              <div className="flex flex-1 min-h-[560px] relative">
+                {/* Monaco Code Editor */}
+                <MonacoCodeEditor
+                  collaborationClient={collabClient}
+                  language={activeTab.language}
+                  settings={settings}
+                  isReadOnly={isReadOnly}
+                  onCursorChange={(pos) => setCursorPos(pos)}
+                  editorRef={editorRef}
+                />
 
-                      {/* Reconnect button if disconnected */}
-                      {collabStatus !== 'CONNECTED' && (
-                        <button
-                          onClick={handleReconnect}
-                          className="p-1 text-zinc-400 hover:text-white"
-                          title="Reconnect to room"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Collaborative Text Editing Area */}
-                  <div className="relative min-h-[420px] bg-[#0c0d12] flex">
-                    {/* Line numbers gutter */}
-                    <div className="w-12 py-4 select-none bg-zinc-950/60 border-r border-zinc-900 text-zinc-600 font-mono text-xs text-right pr-3 space-y-1">
-                      {Array.from({ length: Math.max(codeContent.split('\n').length, 18) }).map((_, i) => (
-                        <div key={i}>{i + 1}</div>
-                      ))}
-                    </div>
-
-                    {/* Editor Surface */}
-                    <textarea
-                      ref={textareaRef}
-                      value={codeContent}
-                      onChange={handleTextChange}
-                      onSelect={handleSelectionChange}
-                      onKeyUp={handleSelectionChange}
-                      onClick={handleSelectionChange}
-                      readOnly={roomInfo?.isReadOnly}
-                      placeholder={
-                        roomInfo?.isReadOnly
-                          ? 'Document is currently empty. Awaiting updates from room editors...'
-                          : '// Start collaborating in real-time... (Type code or insert samples below)'
-                      }
-                      spellCheck={false}
-                      className="flex-1 p-4 bg-transparent text-zinc-100 font-mono text-xs leading-relaxed focus:outline-none resize-none min-h-[420px] placeholder:text-zinc-600"
-                    />
-                  </div>
-
-                  {/* Editor Footer Status Bar */}
-                  <div className="px-4 py-2 bg-zinc-900/90 border-t border-zinc-800 text-[11px] font-mono text-zinc-400 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-4">
-                      <span>Ln {cursorPos.line}, Col {cursorPos.column}</span>
-                      <span>{codeContent.length} chars</span>
-                      <span>{codeContent.split('\n').length} lines</span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      {!roomInfo?.isReadOnly && (
-                        <button
-                          onClick={loadSampleCode}
-                          className="hover:text-purple-400 transition-colors flex items-center gap-1"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>Load NestJS Sample</span>
-                        </button>
-                      )}
-                      <span className="text-zinc-600">|</span>
-                      <span>Yjs CRDT v13</span>
-                    </div>
-                  </div>
-                </div>
+                {/* Live Collaborator Presence Roster */}
+                <CollaboratorRoster
+                  participants={participants}
+                  currentUserId={user?.id}
+                  isOpen={isRosterOpen}
+                  onToggle={() => setIsRosterOpen(!isRosterOpen)}
+                />
               </div>
 
-              {/* Right Column: Participants & Room Metadata */}
-              <div className="space-y-4">
-                {/* Active Collaborators Card */}
-                <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2.5">
-                    <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider flex items-center gap-2">
-                      <Users className="w-3.5 h-3.5 text-purple-500" />
-                      <span>In This Room ({participants.length || 1})</span>
-                    </h3>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  </div>
-
-                  <div className="space-y-2">
-                    {/* Current User */}
-                    <div className="p-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white flex-shrink-0"
-                          style={{ backgroundColor: roomInfo?.userColor || '#6366f1' }}
-                        >
-                          {(user?.username || 'You')[0].toUpperCase()}
-                        </div>
-                        <div className="truncate">
-                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                            {user?.displayName || user?.username || 'You'} <span className="text-zinc-400 text-[10px]">(You)</span>
-                          </p>
-                          <p className="text-[10px] text-zinc-400 truncate font-mono">
-                            @{user?.username}
-                          </p>
-                        </div>
-                      </div>
-
-                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                        {roomInfo?.role || workspace?.currentUserRole || 'MEMBER'}
-                      </span>
-                    </div>
-
-                    {/* Remote Participants */}
-                    {participants
-                      .filter((p) => p.id !== user?.id)
-                      .map((p) => (
-                        <div
-                          key={p.clientId}
-                          className="p-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/40 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div
-                              className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white flex-shrink-0"
-                              style={{ backgroundColor: p.color }}
-                            >
-                              {p.username[0].toUpperCase()}
-                            </div>
-                            <div className="truncate">
-                              <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                                {p.displayName || p.username}
-                              </p>
-                              <p className="text-[10px] text-zinc-400 truncate font-mono">
-                                @{p.username}
-                                {p.cursor && ` • Ln ${p.cursor.line}, Col ${p.cursor.column}`}
-                              </p>
-                            </div>
-                          </div>
-
-                          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
-                            {p.role}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
+              {/* IDE Bottom Status Bar */}
+              <div className="h-8 px-4 bg-[#111116] border-t border-zinc-800 text-[11px] font-mono text-zinc-400 flex items-center justify-between select-none">
+                {/* Left indicators */}
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5 text-zinc-300">
+                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                    <span>#{room.slug}</span>
+                  </span>
+                  <span className="hidden sm:inline text-zinc-600">|</span>
+                  <span className="hidden sm:inline text-emerald-400">
+                    CRDT Sync Active: {activeDocumentKey}
+                  </span>
                 </div>
 
-                {/* Session Architecture Specs */}
-                <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-400 font-mono text-[11px] space-y-2">
-                  <div className="flex items-center gap-1.5 text-zinc-300 font-bold border-b border-zinc-800 pb-1.5">
-                    <Terminal className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Real-Time Engine</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-500">Transport:</span>
-                    <span className="text-zinc-300">Binary WebSocket</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-500">CRDT:</span>
-                    <span className="text-emerald-400">Yjs State Vectors</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-500">Persistence:</span>
-                    <span className="text-zinc-300">PostgreSQL Bytea</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-500">Cluster Sync:</span>
-                    <span className="text-zinc-300">Redis Pub/Sub</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-500">Awareness:</span>
-                    <span className="text-purple-400">Yjs Presence</span>
-                  </div>
+                {/* Right indicators */}
+                <div className="flex items-center gap-4">
+                  {!isReadOnly && (
+                    <button
+                      onClick={loadSampleCode}
+                      className="hover:text-purple-400 transition-colors hidden md:flex items-center gap-1 text-zinc-400"
+                    >
+                      <Sparkles className="w-3 h-3 text-purple-400" />
+                      <span>Sample Code</span>
+                    </button>
+                  )}
+                  <span className="text-zinc-300">
+                    Ln {cursorPos.line}, Col {cursorPos.column}
+                  </span>
+                  <span className="hidden sm:inline">Spaces: {settings.tabSize}</span>
+                  <span className="hidden sm:inline">UTF-8</span>
+                  <span className="text-purple-400 font-semibold uppercase">{activeTab.language}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* System Specs Footer */}
+            <div className="p-4 rounded-2xl bg-[#111116] border border-zinc-800 text-zinc-400 font-mono text-xs flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-zinc-300 font-semibold">
+                <Terminal className="w-4 h-4 text-purple-400" />
+                <span>Architecture Specification</span>
+              </div>
+              <div className="flex items-center gap-6 text-[11px] text-zinc-500">
+                <span>Transport: <strong className="text-zinc-300">Binary WebSocket</strong></span>
+                <span>CRDT: <strong className="text-emerald-400">Yjs State Vectors</strong></span>
+                <span>Editor: <strong className="text-purple-400">Microsoft Monaco</strong></span>
+                <span>Presence: <strong className="text-zinc-300">Awareness Protocol</strong></span>
               </div>
             </div>
           </div>
         )}
+
+        {/* Editor Settings Modal */}
+        <EditorSettingsDialog
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          settings={settings}
+          onSettingsChange={(newSettings) => setSettings(newSettings)}
+        />
       </div>
     </ProtectedRoute>
   );
@@ -586,8 +569,8 @@ export default function RoomDetailPage({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+        <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
         </div>
       }
     >

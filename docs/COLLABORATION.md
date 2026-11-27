@@ -126,3 +126,14 @@ Automated benchmarks in `src/__tests__/performance.test.ts` verify:
 - **Serialization & Deserialization**: Binary packet transformation in under `5ms`.
 - **Snapshot Compaction**: 200 incremental edits compacted in under `15ms`.
 - **Awareness Engine**: 1,000 cursor updates encoded and applied in under `200ms` (> 5,000 updates/sec).
+
+---
+
+## 8. Frontend Integration: Monaco Editor & Awareness
+
+In Phase 5, the browser client (`apps/web`) connects Microsoft Monaco Editor to the Yjs collaboration engine:
+- **`MonacoYjsBinding`**: Handles bidirectional synchronization between Monaco's text model and `Y.Text('content')` protected by a re-entrant mutex lock.
+- **Remote Cursors & Selection Highlights**: Maps remote awareness states into Monaco delta decorations with collaborator colors, initials, and name tags.
+- **Document Routing**: Multi-tab buffers route to distinct `documentKey` instances per room.
+- **Read-Only Enforcement**: Automatically configures `readOnly: true` in Monaco for users with the `VIEWER` role.
+See [docs/EDITOR.md](./EDITOR.md) for full implementation details.

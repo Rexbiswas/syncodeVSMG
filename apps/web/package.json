@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@syncode/config": "workspace:*",
     "@syncode/protocol": "workspace:*",
     "@syncode/validation": "workspace:*",
@@ -21,10 +22,12 @@
     "gsap": "^3.12.7",
     "lib0": "^0.2.98",
     "lucide-react": "^0.475.0",
+    "monaco-editor": "^0.58.0",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "tailwind-merge": "^3.0.1",
+    "y-monaco": "^0.1.6",
     "y-protocols": "^1.0.7",
     "yjs": "^13.6.33"
   },

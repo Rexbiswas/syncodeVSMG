@@ -82,6 +82,6 @@ The `GET /api/v1/health` endpoint tests end-to-end service availability:
 2. **Phase 2: Authentication & User Management** (Completed): JWT session rotation, OAuth 2.0, password security, email verification.
 3. **Phase 3: Workspaces & Room Management** (Completed): Multi-tenant workspaces, membership RBAC (OWNER, ADMIN, MEMBER, VIEWER), invitation lifecycle, collaboration rooms.
 4. **Phase 4: Real-Time Collaboration Engine** (Completed): Yjs CRDT binary WebSockets, persistent snapshots in PostgreSQL, multi-node replication via Redis Pub/Sub, awareness and presence. See [docs/COLLABORATION.md](./COLLABORATION.md).
-5. **Phase 5: Editor Integration & Monaco Engine** (Upcoming): In-browser Monaco editor binding, multi-cursor decorations, syntax highlighting.
+5. **Phase 5: Browser-Based Code Editor** (Completed): In-browser Microsoft Monaco Editor integration, bidirectional Yjs synchronization (`MonacoYjsBinding`), dynamic cursor/selection styling, 21 supported programming languages, multi-tab buffer management, customizable themes (`syncode-dark`/`syncode-light`), user preferences, and strict RBAC read-only enforcement for VIEWERS. See [docs/EDITOR.md](./EDITOR.md).
 6. **Phase 6: Universal IDE Adapters** (Upcoming): VS Code, JetBrains, and Neovim extensions communicating over universal protocol contracts.
 
