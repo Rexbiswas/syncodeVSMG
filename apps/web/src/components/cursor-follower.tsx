@@ -9,7 +9,6 @@ interface BinaryParticle {
   y: number;
   char: '0' | '1';
   size: number;
-  color: string;
   driftX: number;
   driftY: number;
   rotation: number;
@@ -22,17 +21,7 @@ interface ClickBinaryParticle {
   char: '0' | '1';
   targetX: number;
   targetY: number;
-  color: string;
 }
-
-const BINARY_COLORS = [
-  '#10b981', // emerald-500
-  '#06b6d4', // cyan-500
-  '#8b5cf6', // violet-500
-  '#7657ff', // SYNCODE purple
-  '#3b82f6', // blue-500
-  '#34d399', // emerald-400
-];
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
@@ -66,7 +55,6 @@ export function CursorFollower() {
 
     const id = ++particleIdCounter.current;
     const char: '0' | '1' = id % 2 === 0 ? '1' : '0';
-    const color = BINARY_COLORS[id % BINARY_COLORS.length];
     const size = (id % 3) + 11; // 11px to 13px
     const driftX = ((id * 5) % 15) - 7; // -7px to +7px
     const driftY = ((id * 7) % 18) + 8; // gentle downward fall 8px to 25px
@@ -74,7 +62,7 @@ export function CursorFollower() {
 
     setBinaryTrail((prev) => [
       ...prev.slice(-16), // maintain at most 16 active trailing characters in memory
-      { id, x, y, char, size, color, driftX, driftY, rotation },
+      { id, x, y, char, size, driftX, driftY, rotation },
     ]);
   }, []);
 
@@ -93,7 +81,6 @@ export function CursorFollower() {
         char: idx % 2 === 0 ? '1' : '0',
         targetX: x + Math.cos(rad) * dist,
         targetY: y + Math.sin(rad) * dist,
-        color: BINARY_COLORS[(id + idx) % BINARY_COLORS.length],
       });
     });
 
@@ -161,7 +148,7 @@ export function CursorFollower() {
       className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 1. Binary Number Movement Trail */}
+      {/* 1. Binary Number Movement Trail (#1d1d1f) */}
       <AnimatePresence>
         {binaryTrail.map((p) => (
           <motion.span
@@ -184,11 +171,9 @@ export function CursorFollower() {
             onAnimationComplete={() => {
               setBinaryTrail((prev) => prev.filter((item) => item.id !== p.id));
             }}
-            className="pointer-events-none absolute font-mono font-bold leading-none select-none"
+            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-[#1d1d1f] dark:text-zinc-300"
             style={{
               fontSize: `${p.size}px`,
-              color: p.color,
-              textShadow: `0 0 6px ${p.color}`,
             }}
           >
             {p.char}
@@ -196,7 +181,7 @@ export function CursorFollower() {
         ))}
       </AnimatePresence>
 
-      {/* 2. Click Binary Number Burst */}
+      {/* 2. Click Binary Number Burst (#1d1d1f) */}
       <AnimatePresence>
         {clickBursts.map((p) => (
           <motion.span
@@ -214,11 +199,7 @@ export function CursorFollower() {
               opacity: 0,
             }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-xs"
-            style={{
-              color: p.color,
-              textShadow: `0 0 8px ${p.color}`,
-            }}
+            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-xs text-[#1d1d1f] dark:text-zinc-300"
           >
             {p.char}
           </motion.span>
