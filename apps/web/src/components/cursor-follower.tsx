@@ -3,78 +3,106 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 
-interface Particle {
+interface BinaryParticle {
   id: number;
   x: number;
   y: number;
+  char: '0' | '1';
   size: number;
   color: string;
   driftX: number;
   driftY: number;
+  rotation: number;
 }
 
-interface ClickPulse {
+interface ClickBinaryParticle {
   id: number;
   x: number;
   y: number;
+  char: '0' | '1';
+  targetX: number;
+  targetY: number;
   color: string;
 }
 
-const PARTICLE_COLORS = [
+const BINARY_COLORS = [
   '#10b981', // emerald-500
   '#06b6d4', // cyan-500
   '#8b5cf6', // violet-500
+  '#7657ff', // SYNCODE purple
   '#3b82f6', // blue-500
+  '#34d399', // emerald-400
 ];
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [hoverLabel, setHoverLabel] = useState<string | null>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [clickPulses, setClickPulses] = useState<ClickPulse[]>([]);
+  const [binaryTrail, setBinaryTrail] = useState<BinaryParticle[]>([]);
+  const [clickBursts, setClickBursts] = useState<ClickBinaryParticle[]>([]);
 
   const rawMouseX = useMotionValue(-100);
   const rawMouseY = useMotionValue(-100);
 
-  // Smooth ambient aura spring
-  const auraX = useSpring(rawMouseX, { stiffness: 200, damping: 25 });
-  const auraY = useSpring(rawMouseY, { stiffness: 200, damping: 25 });
-
-  // Floating label spring (slightly faster follow)
+  // Floating label spring
   const labelX = useSpring(rawMouseX, { stiffness: 350, damping: 28 });
   const labelY = useSpring(rawMouseY, { stiffness: 350, damping: 28 });
 
   const lastSpawnTime = useRef<number>(0);
+  const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const particleIdCounter = useRef<number>(0);
-  const pulseIdCounter = useRef<number>(0);
 
-  const spawnParticle = useCallback((x: number, y: number) => {
+  const spawnBinaryParticle = useCallback((x: number, y: number) => {
     const now = performance.now();
-    // Throttle particle generation to ~45ms for 60fps performance
-    if (now - lastSpawnTime.current < 45) return;
+    // Throttle to ~35ms for smooth 60fps performance
+    if (now - lastSpawnTime.current < 35) return;
+
+    // Minimum movement threshold (at least 6px) to avoid clustering when stationary
+    const dx = x - lastMousePos.current.x;
+    const dy = y - lastMousePos.current.y;
+    if (Math.hypot(dx, dy) < 6) return;
+
     lastSpawnTime.current = now;
+    lastMousePos.current = { x, y };
 
     const id = ++particleIdCounter.current;
-    const color = PARTICLE_COLORS[id % PARTICLE_COLORS.length];
-    const size = ((id * 3) % 4) + 2.5; // 2.5px - 5.5px
-    const driftX = ((id * 7) % 17) - 8;
-    const driftY = ((id * 11) % 17) - 8;
+    const char: '0' | '1' = id % 2 === 0 ? '1' : '0';
+    const color = BINARY_COLORS[id % BINARY_COLORS.length];
+    const size = (id % 3) + 11; // 11px to 13px
+    const driftX = ((id * 5) % 15) - 7; // -7px to +7px
+    const driftY = ((id * 7) % 18) + 8; // gentle downward fall 8px to 25px
+    const rotation = ((id * 11) % 25) - 12; // -12deg to +12deg
 
-    setParticles((prev) => [
-      ...prev.slice(-10), // keep max 10 active particles in memory
-      { id, x, y, size, color, driftX, driftY },
+    setBinaryTrail((prev) => [
+      ...prev.slice(-16), // maintain at most 16 active trailing characters in memory
+      { id, x, y, char, size, color, driftX, driftY, rotation },
     ]);
   }, []);
 
-  const triggerClickRipple = useCallback((x: number, y: number) => {
-    const id = ++pulseIdCounter.current;
-    const color = PARTICLE_COLORS[id % PARTICLE_COLORS.length];
+  const triggerClickBinaryBurst = useCallback((x: number, y: number) => {
+    const burstParticles: ClickBinaryParticle[] = [];
+    const angles = [0, 60, 120, 180, 240, 300];
 
-    setClickPulses((prev) => [...prev.slice(-4), { id, x, y, color }]);
+    angles.forEach((angle, idx) => {
+      const rad = (angle * Math.PI) / 180;
+      const dist = 28 + (idx % 2) * 8; // 28px - 36px outward radius
+      const id = ++particleIdCounter.current;
+      burstParticles.push({
+        id,
+        x,
+        y,
+        char: idx % 2 === 0 ? '1' : '0',
+        targetX: x + Math.cos(rad) * dist,
+        targetY: y + Math.sin(rad) * dist,
+        color: BINARY_COLORS[(id + idx) % BINARY_COLORS.length],
+      });
+    });
+
+    setClickBursts((prev) => [...prev.slice(-12), ...burstParticles]);
 
     setTimeout(() => {
-      setClickPulses((prev) => prev.filter((p) => p.id !== id));
+      setClickBursts((prev) =>
+        prev.filter((p) => !burstParticles.some((bp) => bp.id === p.id)),
+      );
     }, 600);
   }, []);
 
@@ -88,11 +116,11 @@ export function CursorFollower() {
       rawMouseY.set(e.clientY);
       if (!isVisible) setIsVisible(true);
 
-      spawnParticle(e.clientX, e.clientY);
+      spawnBinaryParticle(e.clientX, e.clientY);
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      triggerClickRipple(e.clientX, e.clientY);
+      triggerClickBinaryBurst(e.clientX, e.clientY);
     };
 
     const handleMouseLeave = () => setIsVisible(false);
@@ -102,16 +130,11 @@ export function CursorFollower() {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
-      const interactive = target.closest<HTMLElement>(
-        'a, button, [role="button"], input, textarea, select, .interactive, [data-cursor]',
-      );
-
+      const interactive = target.closest<HTMLElement>('[data-cursor]');
       if (interactive) {
-        setIsHovered(true);
         const customText = interactive.getAttribute('data-cursor');
         setHoverLabel(customText);
       } else {
-        setIsHovered(false);
         setHoverLabel(null);
       }
     };
@@ -129,118 +152,80 @@ export function CursorFollower() {
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseover', handleMouseOver);
     };
-  }, [rawMouseX, rawMouseY, isVisible, spawnParticle, triggerClickRipple]);
+  }, [rawMouseX, rawMouseY, isVisible, spawnBinaryParticle, triggerClickBinaryBurst]);
 
   if (!isVisible) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden="true">
-      {/* 1. Ambient Dynamic Glow Aura (Smooth non-intrusive background illumination) */}
-      <motion.div
-        style={{
-          x: auraX,
-          y: auraY,
-        }}
-        animate={{
-          scale: isHovered ? 1.35 : 1,
-          opacity: isVisible ? 1 : 0,
-        }}
-        transition={{ type: 'spring', stiffness: 280, damping: 25 }}
-        className="pointer-events-none absolute -top-36 -left-36 h-72 w-72 rounded-full bg-gradient-to-tr from-emerald-500/15 via-cyan-500/12 to-violet-500/10 blur-3xl dark:from-emerald-400/12 dark:via-cyan-400/10 dark:to-violet-400/8 mix-blend-screen"
-      />
-
-      {/* 2. Interactive Movement Sparkles / Stardust Trail */}
+    <div
+      className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
+      aria-hidden="true"
+    >
+      {/* 1. Binary Number Movement Trail */}
       <AnimatePresence>
-        {particles.map((p) => (
-          <motion.div
+        {binaryTrail.map((p) => (
+          <motion.span
             key={p.id}
             initial={{
-              x: p.x - p.size / 2,
-              y: p.y - p.size / 2,
+              x: p.x - 4,
+              y: p.y - 8,
               scale: 1,
-              opacity: 0.75,
+              opacity: 0.95,
+              rotate: p.rotation,
             }}
             animate={{
-              scale: 0.1,
+              scale: 0.65,
               opacity: 0,
               y: p.y + p.driftY,
               x: p.x + p.driftX,
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
             onAnimationComplete={() => {
-              setParticles((prev) => prev.filter((item) => item.id !== p.id));
+              setBinaryTrail((prev) => prev.filter((item) => item.id !== p.id));
             }}
-            className="pointer-events-none absolute rounded-full shadow-sm"
+            className="pointer-events-none absolute font-mono font-bold leading-none select-none"
             style={{
-              width: p.size,
-              height: p.size,
-              backgroundColor: p.color,
-              boxShadow: `0 0 8px ${p.color}`,
+              fontSize: `${p.size}px`,
+              color: p.color,
+              textShadow: `0 0 6px ${p.color}`,
             }}
-          />
+          >
+            {p.char}
+          </motion.span>
         ))}
       </AnimatePresence>
 
-      {/* 3. Click Shockwave Ripples & Embers */}
+      {/* 2. Click Binary Number Burst */}
       <AnimatePresence>
-        {clickPulses.map((pulse) => (
-          <React.Fragment key={pulse.id}>
-            {/* Expanding Shockwave Ring */}
-            <motion.div
-              initial={{
-                x: pulse.x - 10,
-                y: pulse.y - 10,
-                width: 20,
-                height: 20,
-                scale: 0.3,
-                opacity: 0.9,
-              }}
-              animate={{
-                scale: 3.2,
-                opacity: 0,
-              }}
-              transition={{ duration: 0.55, ease: 'easeOut' }}
-              className="pointer-events-none absolute rounded-full border-2"
-              style={{
-                borderColor: pulse.color,
-                boxShadow: `0 0 16px ${pulse.color}`,
-              }}
-            />
-
-            {/* Micro Embers Radiating Outward on Click */}
-            {[0, 60, 120, 180, 240, 300].map((angle, idx) => {
-              const rad = (angle * Math.PI) / 180;
-              const dist = 24;
-              return (
-                <motion.div
-                  key={`${pulse.id}-ember-${idx}`}
-                  initial={{
-                    x: pulse.x,
-                    y: pulse.y,
-                    scale: 1,
-                    opacity: 0.9,
-                  }}
-                  animate={{
-                    x: pulse.x + Math.cos(rad) * dist,
-                    y: pulse.y + Math.sin(rad) * dist,
-                    scale: 0.2,
-                    opacity: 0,
-                  }}
-                  transition={{ duration: 0.45, ease: 'easeOut' }}
-                  className="pointer-events-none absolute h-1.5 w-1.5 rounded-full"
-                  style={{
-                    backgroundColor: pulse.color,
-                    boxShadow: `0 0 6px ${pulse.color}`,
-                  }}
-                />
-              );
-            })}
-          </React.Fragment>
+        {clickBursts.map((p) => (
+          <motion.span
+            key={p.id}
+            initial={{
+              x: p.x - 4,
+              y: p.y - 8,
+              scale: 1.2,
+              opacity: 1,
+            }}
+            animate={{
+              x: p.targetX,
+              y: p.targetY,
+              scale: 0.4,
+              opacity: 0,
+            }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-xs"
+            style={{
+              color: p.color,
+              textShadow: `0 0 8px ${p.color}`,
+            }}
+          >
+            {p.char}
+          </motion.span>
         ))}
       </AnimatePresence>
 
-      {/* 4. Contextual Floating Chip / Badge when Hovering Interactive Elements with data-cursor */}
+      {/* 3. Contextual Floating Chip / Badge for [data-cursor] */}
       <AnimatePresence>
         {hoverLabel && (
           <motion.div
@@ -252,9 +237,9 @@ export function CursorFollower() {
             animate={{ opacity: 1, scale: 1, y: 22 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-            className="pointer-events-none absolute left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-950/90 dark:bg-zinc-900/90 text-white text-[11px] font-mono shadow-xl border border-emerald-500/40 backdrop-blur-md"
+            className="pointer-events-none absolute left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-950/90 dark:bg-zinc-900/90 text-white text-[11px] font-mono shadow-xl border border-purple-500/40 backdrop-blur-md"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             <span>{hoverLabel}</span>
           </motion.div>
         )}
