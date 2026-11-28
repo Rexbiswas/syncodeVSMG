@@ -21,6 +21,7 @@ interface ClickBinaryParticle {
   char: '0' | '1';
   targetX: number;
   targetY: number;
+  size: number;
 }
 
 export function CursorFollower() {
@@ -42,37 +43,48 @@ export function CursorFollower() {
 
   const spawnBinaryParticle = useCallback((x: number, y: number) => {
     const now = performance.now();
-    // Throttle to ~35ms for smooth 60fps performance
-    if (now - lastSpawnTime.current < 35) return;
+    // Throttle to ~28ms for responsive trail generation
+    if (now - lastSpawnTime.current < 28) return;
 
-    // Minimum movement threshold (at least 6px) to avoid clustering when stationary
+    // Minimum movement threshold (at least 5px)
     const dx = x - lastMousePos.current.x;
     const dy = y - lastMousePos.current.y;
-    if (Math.hypot(dx, dy) < 6) return;
+    if (Math.hypot(dx, dy) < 5) return;
 
     lastSpawnTime.current = now;
     lastMousePos.current = { x, y };
 
     const id = ++particleIdCounter.current;
     const char: '0' | '1' = id % 2 === 0 ? '1' : '0';
-    const size = (id % 3) + 11; // 11px to 13px
-    const driftX = ((id * 5) % 15) - 7; // -7px to +7px
-    const driftY = ((id * 7) % 18) + 8; // gentle downward fall 8px to 25px
-    const rotation = ((id * 11) % 25) - 12; // -12deg to +12deg
+    
+    // Increased font size diameter: 14px to 17px
+    const size = (id % 4) + 14;
+
+    // Expanded radial diameter: spread particles across a ~50px - 70px circular field around cursor
+    const angle = (id * 137.5 * Math.PI) / 180; // golden ratio distribution
+    const spreadRadius = ((id % 7) + 2) * 4.5; // 9px to 36px radius (up to 72px diameter)
+    const spawnX = x + Math.cos(angle) * spreadRadius;
+    const spawnY = y + Math.sin(angle) * spreadRadius;
+
+    // Outward drift + subtle downward gravity
+    const driftX = Math.cos(angle) * 10;
+    const driftY = Math.sin(angle) * 10 + 12;
+    const rotation = ((id * 13) % 29) - 14; // -14deg to +14deg
 
     setBinaryTrail((prev) => [
-      ...prev.slice(-16), // maintain at most 16 active trailing characters in memory
-      { id, x, y, char, size, driftX, driftY, rotation },
+      ...prev.slice(-24), // maintain up to 24 active trailing characters for a fuller aura
+      { id, x: spawnX, y: spawnY, char, size, driftX, driftY, rotation },
     ]);
   }, []);
 
   const triggerClickBinaryBurst = useCallback((x: number, y: number) => {
     const burstParticles: ClickBinaryParticle[] = [];
-    const angles = [0, 60, 120, 180, 240, 300];
+    const angles = [0, 45, 90, 135, 180, 225, 270, 315];
 
     angles.forEach((angle, idx) => {
       const rad = (angle * Math.PI) / 180;
-      const dist = 28 + (idx % 2) * 8; // 28px - 36px outward radius
+      // Increased click burst spread diameter (up to 120px - 150px)
+      const dist = 52 + (idx % 3) * 16;
       const id = ++particleIdCounter.current;
       burstParticles.push({
         id,
@@ -81,16 +93,17 @@ export function CursorFollower() {
         char: idx % 2 === 0 ? '1' : '0',
         targetX: x + Math.cos(rad) * dist,
         targetY: y + Math.sin(rad) * dist,
+        size: 15 + (idx % 3),
       });
     });
 
-    setClickBursts((prev) => [...prev.slice(-12), ...burstParticles]);
+    setClickBursts((prev) => [...prev.slice(-16), ...burstParticles]);
 
     setTimeout(() => {
       setClickBursts((prev) =>
         prev.filter((p) => !burstParticles.some((bp) => bp.id === p.id)),
       );
-    }, 600);
+    }, 650);
   }, []);
 
   useEffect(() => {
@@ -148,26 +161,26 @@ export function CursorFollower() {
       className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 1. Binary Number Movement Trail (#1d1d1f) */}
+      {/* 1. Binary Number Movement Trail (Expanded Diameter & #1d1d1f) */}
       <AnimatePresence>
         {binaryTrail.map((p) => (
           <motion.span
             key={p.id}
             initial={{
-              x: p.x - 4,
-              y: p.y - 8,
-              scale: 1,
+              x: p.x - 6,
+              y: p.y - 10,
+              scale: 1.1,
               opacity: 0.95,
               rotate: p.rotation,
             }}
             animate={{
-              scale: 0.65,
+              scale: 0.7,
               opacity: 0,
               y: p.y + p.driftY,
               x: p.x + p.driftX,
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
+            transition={{ duration: 0.75, ease: 'easeOut' }}
             onAnimationComplete={() => {
               setBinaryTrail((prev) => prev.filter((item) => item.id !== p.id));
             }}
@@ -181,25 +194,28 @@ export function CursorFollower() {
         ))}
       </AnimatePresence>
 
-      {/* 2. Click Binary Number Burst (#1d1d1f) */}
+      {/* 2. Click Binary Number Burst (Expanded Diameter) */}
       <AnimatePresence>
         {clickBursts.map((p) => (
           <motion.span
             key={p.id}
             initial={{
-              x: p.x - 4,
-              y: p.y - 8,
-              scale: 1.2,
+              x: p.x - 6,
+              y: p.y - 10,
+              scale: 1.3,
               opacity: 1,
             }}
             animate={{
               x: p.targetX,
               y: p.targetY,
-              scale: 0.4,
+              scale: 0.45,
               opacity: 0,
             }}
-            transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-xs text-[#1d1d1f] dark:text-zinc-300"
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="pointer-events-none absolute font-mono font-bold leading-none select-none text-[#1d1d1f] dark:text-zinc-300"
+            style={{
+              fontSize: `${p.size}px`,
+            }}
           >
             {p.char}
           </motion.span>
